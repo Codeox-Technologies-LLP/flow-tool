@@ -71,7 +71,7 @@ export default function LoginForm() {
   };
 
   const handleSignUp = () => {
-    router.push("/register");
+    router.push("/auth/register");
   };
 
   return (

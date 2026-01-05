@@ -19,7 +19,7 @@ export default function AuthLayout({
       <DecorativeBackground />
 
       {/* Container */}
-      <div className="w-full max-w-1920px mx-auto flex relative z-10">
+      <div className="w-full max-w-1920px mx-auto flex relative z-10 min-h-screen">
         {/* Left Side - Branding & Features (Desktop only) */}
         <AuthBrandingSide
           title={
@@ -33,10 +33,10 @@ export default function AuthLayout({
         />
 
         {/* Right Side - Form Container */}
-        <div className="w-full lg:w-1/2 xl:w-2/5 flex items-center justify-center p-6 sm:p-8 xl:p-12">
-          <div className="w-full max-w-md">
+        <div className="w-full lg:w-1/2 xl:w-2/5 flex items-center justify-center p-4 sm:p-6 xl:p-8 overflow-y-auto">
+          <div className="w-full max-w-md my-auto">
             {/* Mobile Logo */}
-            <div className="lg:hidden flex justify-center mb-10">
+            <div className="lg:hidden flex justify-center mb-8">
               <FlowtoolLogo variant="default" width={160} height={45} />
             </div>
 
