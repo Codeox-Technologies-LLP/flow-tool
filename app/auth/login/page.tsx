@@ -1,13 +1,11 @@
-"use client"
 
-import LoginForm from "@/components/auth/login/login-form"
-import SecurityNotice from "@/components/auth/login/security-notice"
+
+import LoginForm from "@/components/auth/login/login-form";
 
 export default function LoginPage() {
   return (
     <>
       <LoginForm />
-      <SecurityNotice />
     </>
-  )
+  );
 }
