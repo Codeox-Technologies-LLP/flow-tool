@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowRight, Shield, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 
-import { registerSchema, type RegisterFormData } from "@/lib/validations/register";
+import {
+  registerSchema,
+  type RegisterFormData,
+} from "@/lib/validations/register";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -216,14 +219,6 @@ const RegisterForm = () => {
       >
         Sign in instead
       </button>
-
-      {/* Security Notice */}
-      <div className="mt-4 sm:mt-6 text-center">
-        <p className="text-xs sm:text-sm text-gray-500 flex items-center justify-center gap-2">
-          <Shield className="w-4 h-4" />
-          Protected by enterprise-grade security
-        </p>
-      </div>
     </div>
   );
 };
