@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowRight, Loader2 } from "lucide-react";
-import { signIn } from "next-auth/react";
 
 import { loginSchema, type LoginFormData } from "@/lib/validations/login";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PasswordInput from "@/components/ui/password-input";
 import FormDivider from "@/components/auth/shared/form-devider";
+import { authApi } from "@/lib/api/auth";
+import { cookieStorage } from "@/lib/utils/cookies";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -35,27 +36,50 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      const result = await signIn("credentials", {
+      // Step 1: Call backend login API
+      const response = await authApi.login({
         email: data.email,
         password: data.password,
-        redirect: false,
       });
 
-      if (result?.error) {
+      if (!response.status) {
         toast.error("Login failed", {
-          description: "Invalid email or password",
+          description: response.message || "Invalid credentials",
         });
-      } else {
-        toast.success("Login successful!", {
-          description: "Welcome back!",
-        });
-        router.push("/dashboard");
-        router.refresh();
+        setLoading(false);
+        return;
       }
-    } catch (error: any) {
+
+      // Step 2: Store token and user info in cookies
+      cookieStorage.setAuthToken(response.token);
+      
+      if ("user" in response) {
+        // LoginSuccessResponse
+        cookieStorage.setUserInfo({
+          userId: response.user.userId,
+          orgId: response.user.orgId,
+        });
+
+        toast.success("Login successful!", {
+          description: `Welcome back, ${response.user.fullName}!`,
+        });
+        router.push("/app");
+        router.refresh();
+      } else {
+        // LoginRedirectResponse - handle redirect if needed
+        toast.info(response.message);
+        if (response.redirectUrl) {
+          router.push(response.redirectUrl);
+        }
+      }
+    } catch (error) {
       console.error("Login error:", error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "An error occurred. Please try again.";
+      
       toast.error("Login failed", {
-        description: "An error occurred. Please try again.",
+        description: errorMessage,
       });
     } finally {
       setLoading(false);

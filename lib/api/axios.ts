@@ -60,18 +60,3 @@ apiClient.interceptors.response.use(
   }
 );
 
-// Server-side API client with auth - use this in Server Components/Actions
-export const createServerApiClient = async () => {
-  const { auth } = await import("@/auth");
-  const session = await auth();
-  
-  return axios.create({
-    baseURL: `${baseURL}/api`,
-    headers: {
-      "Content-Type": "application/json",
-      ...(session?.accessToken && {
-        Authorization: `Bearer ${session.accessToken}`,
-      }),
-    },
-  });
-};

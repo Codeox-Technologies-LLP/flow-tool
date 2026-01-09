@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { ArrowRight, Loader2 } from "lucide-react";
-import { signIn } from "next-auth/react";
 
 import {
   companySetupSchema,
@@ -75,34 +74,14 @@ const CompanySetupForm = () => {
         //   });
         // }
 
-        const token = cookieStorage.getAuthToken();
+        toast.success("🎉 Welcome aboard!", {
+          description: "Your workspace is ready to go.",
+        });
 
-        if (token) {
-          // Sign in with NextAuth to create session
-          const result = await signIn("credentials", {
-            redirect: false,
-            token,
-            userId: userInfo.userId,
-          });
-
-          if (result?.ok) {
-            setTimeout(() => {
-              router.push("/dashboard");
-              router.refresh();
-            }, 1000);
-          } else {
-            toast.error("Failed to create session. Please login again.");
-            cookieStorage.clearAll();
-            setTimeout(() => {
-              router.push("/auth/login");
-            }, 1500);
-          }
-        } else {
-          toast.error("Authentication data not found. Please login again.");
-          setTimeout(() => {
-            router.push("/auth/login");
-          }, 1500);
-        }
+        setTimeout(() => {
+          router.push("/app");
+          router.refresh();
+        }, 1000);
       } else {
         throw new Error(response.message || "Company setup failed");
       }
