@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { ArrowRight, Loader2 } from "lucide-react";
+import { get } from "lodash";
 
 import {
   registerSchema,
@@ -39,35 +40,48 @@ const RegisterForm = () => {
 
   const onSubmit = async (data: RegisterFormData) => {
     setLoading(true);
-    debugger;
+
     try {
-      const response = await authApi.register({
+      // Build payload with proper typing
+      const payload: {
+        firstName: string;
+        lastName?: string;
+        email: string;
+        password: string;
+      } = {
         firstName: data.firstName,
-        lastName: data.lastName || undefined,
         email: data.email,
         password: data.password,
-      });
+      };
 
-      if (response.status) {
+      // Only add lastName if it exists
+      if (data.lastName) {
+        payload.lastName = data.lastName;
+      }
+
+      const response = await authApi.register(payload);
+
+      const status = get(response, "status", false);
+      const message = get(response, "message", "Registration failed");
+
+      if (status) {
         // Store registration data in cookie for OTP resend
-        cookieStorage.setTempRegisterData({
-          firstName: data.firstName,
-          lastName: data.lastName || undefined,
-          email: data.email,
-          password: data.password,
-        });
+        cookieStorage.setTempRegisterData(payload);
 
         toast.success("Registration successful!", {
-          description: response.message,
+          description: message,
         });
 
         router.push(`/auth/otp-verify?email=${encodeURIComponent(data.email)}`);
       } else {
-        throw new Error(response.message || "Registration failed");
+        throw new Error(message);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error during registration:", error);
-      const errorMessage = error.response?.data?.message || error.message || "Registration failed";
+      const errorMessage = error instanceof Error
+        ? error.message
+        : get(error, "response.data.message") || get(error, "message", "Registration failed");
+      
       toast.error("Registration failed", {
         description: errorMessage,
       });

@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { ArrowRight, Mail, ArrowLeft, Loader2 } from "lucide-react";
-import axios from "axios";
+import { get, fill, some } from "lodash";
 
 import { otpSchema, type OtpFormData } from "@/lib/validations/otp";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ const OtpVerifyForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
-  
+
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(60);
@@ -108,38 +108,41 @@ const OtpVerifyForm = () => {
         otp: data.otp,
       });
 
-      if (response.status) {
+      const status = get(response, "status", false);
+      const message = get(response, "message", "OTP verification failed");
+      const token = get(response, "token", "");
+      const userId = get(response, "userId", "");
+      const orgId = get(response, "orgId", "");
+
+      if (status) {
         // Store token and user info in cookies
-        cookieStorage.setAuthToken(response.token);
-        cookieStorage.setUserInfo({
-          userId: response.userId,
-          orgId: response.orgId,
-        });
+        cookieStorage.setAuthToken(token);
+        cookieStorage.setUserInfo({ userId, orgId });
 
         // Clear temporary registration data
         cookieStorage.removeTempRegisterData();
 
         toast.success("Verification successful!", {
-          description: response.message,
+          description: message,
         });
 
         // Redirect to company setup
-        // Note: We don't set NextAuth session yet - that happens after company setup
         router.push("/company-setup");
       } else {
-        throw new Error(response.message || "OTP verification failed");
+        throw new Error(message);
       }
     } catch (error: unknown) {
       console.error("OTP verification error:", error);
-      const errorMessage = axios.isAxiosError(error) 
-        ? error.response?.data?.message || error.message 
-        : error instanceof Error 
-        ? error.message 
-        : "Invalid OTP";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : get(error, "response.data.message") ||
+            get(error, "message", "Invalid OTP");
+
       toast.error("Verification failed", {
         description: errorMessage,
       });
-      setOtp(["", "", "", "", "", ""]);
+      setOtp(fill(Array(6), ""));
       setValue("otp", "");
       inputRefs.current[0]?.focus();
     } finally {
@@ -157,28 +160,31 @@ const OtpVerifyForm = () => {
     }
 
     setLoading(true);
-
     try {
       const response = await authApi.resendOtp(email);
 
-      if (response.status) {
+      const status = get(response, "status", false);
+      const message = get(response, "message", "Failed to resend OTP");
+
+      if (status) {
         toast.success("New OTP sent!", {
-          description: response.message,
+          description: message,
         });
         setResendTimer(60);
-        setOtp(["", "", "", "", "", ""]);
+        setOtp(fill(Array(6), ""));
         setValue("otp", "");
         inputRefs.current[0]?.focus();
       } else {
-        throw new Error(response.message || "Failed to resend OTP");
+        throw new Error(message);
       }
     } catch (error: unknown) {
       console.error("Resend OTP error:", error);
-      const errorMessage = axios.isAxiosError(error)
-        ? error.response?.data?.message || error.message
-        : error instanceof Error
-        ? error.message
-        : "Failed to resend OTP";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : get(error, "response.data.message") ||
+            get(error, "message", "Failed to resend OTP");
+
       toast.error("Resend failed", {
         description: errorMessage,
       });
@@ -267,11 +273,9 @@ const OtpVerifyForm = () => {
             </button>
           )}
         </div>
-
-        {/* Submit Button */}
         <Button
           type="submit"
-          disabled={loading || otp.some((digit) => !digit)}
+          disabled={loading || some(otp, (digit) => !digit)}
           className="w-full h-10 sm:h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm sm:text-base shadow-sm hover:shadow-md transition-all duration-200 mt-6"
         >
           {loading ? (

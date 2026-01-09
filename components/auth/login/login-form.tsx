@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowRight, Loader2 } from "lucide-react";
+import { get, has } from "lodash";
 
 import { loginSchema, type LoginFormData } from "@/lib/validations/login";
 import { Button } from "@/components/ui/button";
@@ -42,41 +43,47 @@ export default function LoginForm() {
         password: data.password,
       });
 
-      if (!response.status) {
+      const status = get(response, "status", false);
+      const message = get(response, "message", "Invalid credentials");
+      const token = get(response, "token", "");
+
+      if (!status) {
         toast.error("Login failed", {
-          description: response.message || "Invalid credentials",
+          description: message,
         });
         setLoading(false);
         return;
       }
 
       // Step 2: Store token and user info in cookies
-      cookieStorage.setAuthToken(response.token);
+      cookieStorage.setAuthToken(token);
       
-      if ("user" in response) {
-        // LoginSuccessResponse
-        cookieStorage.setUserInfo({
-          userId: response.user.userId,
-          orgId: response.user.orgId,
-        });
+      if (has(response, "user")) {
+        const userId = get(response, "user.userId", "");
+        const orgId = get(response, "user.orgId", "");
+        const fullName = get(response, "user.fullName", "User");
+
+        cookieStorage.setUserInfo({ userId, orgId });
 
         toast.success("Login successful!", {
-          description: `Welcome back, ${response.user.fullName}!`,
+          description: `Welcome back, ${fullName}!`,
         });
-        router.push("/app");
+        router.push("/flow-tool");
         router.refresh();
       } else {
         // LoginRedirectResponse - handle redirect if needed
-        toast.info(response.message);
-        if (response.redirectUrl) {
-          router.push(response.redirectUrl);
+        const redirectUrl = get(response, "redirectUrl");
+        
+        toast.info(message);
+        if (redirectUrl) {
+          router.push(redirectUrl);
         }
       }
     } catch (error) {
       console.error("Login error:", error);
       const errorMessage = error instanceof Error 
         ? error.message 
-        : (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "An error occurred. Please try again.";
+        : get(error, "response.data.message", "An error occurred. Please try again.");
       
       toast.error("Login failed", {
         description: errorMessage,
