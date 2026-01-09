@@ -1,329 +1,288 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FormProvider, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { ArrowRight, CheckCircle2, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { signIn } from "next-auth/react";
 
 import {
   companySetupSchema,
   type CompanyFormData,
 } from "@/lib/validations/company-setup";
 import { Button } from "@/components/ui/button";
-import BasicInfo from "./steps/basic-info";
-import AddressDetails from "./steps/address-details";
-import BusinessSettings from "./steps/business-settings";
-
-const steps = [
-  {
-    id: 1,
-    question: "First, what's your company called?",
-    description: "Don't worry, you can change this later",
-  },
-  {
-    id: 2,
-    question: "Where is your company located?",
-    description: "This helps us set up the right defaults for you",
-  },
-  {
-    id: 3,
-    question: "Almost done! Let's set up your currency",
-    description: "We'll use this for all your transactions",
-  },
-];
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { companyApi } from "@/lib/api/company";
+import { cookieStorage } from "@/lib/utils/cookies";
 
 const CompanySetupForm = () => {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const methods = useForm<CompanyFormData>({
+  const {
+    register,
+    handleSubmit: hookFormSubmit,
+    formState: { errors, isValid },
+  } = useForm<CompanyFormData>({
     resolver: zodResolver(companySetupSchema),
     mode: "onChange",
     defaultValues: {
       name: "",
-      legalName: "",
-      shortCode: "",
-      industry: "",
-      website: "",
-      email: "",
-      phone: "",
-      description: "",
-      country: {
-        code: "",
-        name: "",
-      },
-      addressDetails: {
-        city: "",
-        state: "",
-        postalCode: "",
-        country: "",
-      },
-      currency: {
-        code: "",
-        symbol: "",
-        name: "",
-      },
-      businessType: "",
-      operationType: "",
-      timezone: "",
       status: "active" as const,
-      parentId: null,
     },
   });
 
-  const { watch, trigger, getValues } = methods;
-
-  // Handle Enter key to proceed
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Skip if user is typing in a textarea
-      if ((e.target as HTMLElement)?.tagName === "TEXTAREA") return;
-
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        if (currentStep < steps.length) {
-          handleNext();
-        } else {
-          handleSubmit();
-        }
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [currentStep]);
-
-  const preparePayload = () => {
-    const formData = getValues();
-    const payload: any = {
-      name: formData.name.trim(),
-    };
-
-    if (formData.legalName?.trim())
-      payload.legalName = formData.legalName.trim();
-    if (formData.shortCode?.trim())
-      payload.shortCode = formData.shortCode.trim();
-    if (formData.image) payload.image = formData.image;
-    if (formData.phone?.trim()) payload.phone = formData.phone.trim();
-    if (formData.email?.trim())
-      payload.email = formData.email.trim().toLowerCase();
-    if (formData.website?.trim()) payload.website = formData.website.trim();
-    if (formData.currency) payload.currency = formData.currency;
-    if (formData.timezone?.trim()) payload.timezone = formData.timezone.trim();
-    if (formData.country) payload.country = formData.country;
-    if (formData.industry?.trim()) payload.industry = formData.industry.trim();
-    if (formData.businessType?.trim())
-      payload.businessType = formData.businessType.trim();
-    if (formData.operationType?.trim())
-      payload.operationType = formData.operationType.trim();
-    if (formData.description?.trim())
-      payload.description = formData.description.trim();
-    if (formData.status) payload.status = formData.status;
-    if (formData.parentId !== undefined) payload.parentId = formData.parentId;
-
-    if (formData.addressDetails) {
-      const hasAddressData = Object.values(formData.addressDetails).some(
-        (val) => val?.trim()
-      );
-      if (hasAddressData) {
-        payload.addressDetails = formData.addressDetails;
-      }
-    }
-
-    return payload;
-  };
-
-  const validateCurrentStep = async (): Promise<boolean> => {
-    let fieldsToValidate: (keyof CompanyFormData)[] = [];
-
-    switch (currentStep) {
-      case 1: {
-        fieldsToValidate = ["name"];
-        const email = watch("email");
-        const website = watch("website");
-        if (email && email.trim()) fieldsToValidate.push("email");
-        if (website && website.trim()) fieldsToValidate.push("website");
-        break;
-      }
-      case 2:
-      case 3:
-        break;
-    }
-
-    if (fieldsToValidate.length > 0) {
-      const result = await trigger(fieldsToValidate);
-      return result;
-    }
-
-    return true;
-  };
-
-  const handleNext = async () => {
-    const isValid = await validateCurrentStep();
-
-    if (!isValid) {
-      toast.error("Please fill in the required information");
-      return;
-    }
-
-    if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const handleSubmit = async () => {
-    const isValid = await validateCurrentStep();
-
-    if (!isValid) {
-      toast.error("Please complete all required fields");
-      return;
-    }
-
+  const onSubmit = async (data: CompanyFormData) => {
     setLoading(true);
 
     try {
-      const payload = preparePayload();
+      // Verify user info exists in cookies (used by axios interceptor)
+      const userInfo = cookieStorage.getUserInfo<{
+        userId: string;
+        orgId: string;
+      }>();
 
-      const response = await fetch("/api/company/setup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error("Company setup failed");
+      if (!userInfo?.userId || !userInfo?.orgId) {
+        toast.error("User information not found. Please login again.");
+        setTimeout(() => {
+          router.push("/auth/login");
+        }, 1500);
+        return;
       }
 
-      await response.json();
+      // Prepare payload - userId and orgId sent via headers
+      const payload = {
+        name: data.name.trim(),
+        status: data.status,
+      };
 
-      toast.success("🎉 All set!", {
-        description: "Your workspace is ready to go.",
-      });
+      const response = await companyApi.setup(payload);
 
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 1000);
-    } catch (error) {
+      if (response.status) {
+        toast.success("🎉 Welcome aboard!", {
+          description: "Your workspace is ready to go.",
+        });
+
+        // Store additional data if returned from API
+        // if (response.roleId || response.store?._id) {
+        //   cookieStorage.setUserInfo({
+        //     ...userInfo,
+        //     ...(response.roleId && { roleId: response.roleId }),
+        //     ...(response.store?._id && { companyId: response.store._id }),
+        //   });
+        // }
+
+        const token = cookieStorage.getAuthToken();
+
+        if (token) {
+          // Sign in with NextAuth to create session
+          const result = await signIn("credentials", {
+            redirect: false,
+            token,
+            userId: userInfo.userId,
+          });
+
+          if (result?.ok) {
+            setTimeout(() => {
+              router.push("/dashboard");
+              router.refresh();
+            }, 1000);
+          } else {
+            toast.error("Failed to create session. Please login again.");
+            cookieStorage.clearAll();
+            setTimeout(() => {
+              router.push("/auth/login");
+            }, 1500);
+          }
+        } else {
+          toast.error("Authentication data not found. Please login again.");
+          setTimeout(() => {
+            router.push("/auth/login");
+          }, 1500);
+        }
+      } else {
+        throw new Error(response.message || "Company setup failed");
+      }
+    } catch (error: unknown) {
       console.error("Company creation error:", error);
+      const errorMessage =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { message?: string } } }).response
+              ?.data?.message
+          : error instanceof Error
+          ? error.message
+          : "Failed to create company";
       toast.error("Oops! Something went wrong", {
-        description: "Please try again.",
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return <BasicInfo />;
-      case 2:
-        return <AddressDetails />;
-      case 3:
-        return <BusinessSettings />;
-      default:
-        return <BasicInfo />;
-    }
-  };
-
   return (
-    <FormProvider {...methods}>
-      <div className="min-h-screen flex flex-col">
-        {/* Header */}
+    <div className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden">
+      {/* Decorative Background - Same as Auth */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-blue-50 via-white to-blue-50/30"></div>
+        <div className="absolute top-20 right-10 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div className="absolute bottom-20 left-10 w-96 h-96 bg-cyan-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/3 w-72 h-72 bg-blue-50 rounded-full mix-blend-multiply filter blur-3xl opacity-15 animate-blob animation-delay-4000"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
+      </div>
 
-        {/* Main Content */}
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
-          <div className="w-full max-w-3xl">
-            {/* Question */}
-            <div className="mb-8 sm:mb-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-medium mb-6">
-                <Sparkles className="w-4 h-4" />
-                Step {currentStep} of {steps.length}
+      {/* Main Content */}
+      <div className="w-full max-w-5xl mx-auto px-6 py-12 relative z-10">
+        <div className="grid md:grid-cols-2 gap-8 items-start">
+          {/* Left Side - Information */}
+          <div className="space-y-6">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-md text-xs font-medium mb-4 border border-blue-100">
+                <span className="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+                Configuration Required
               </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-                {steps[currentStep - 1].question}
+              <h1 className="text-3xl font-bold text-slate-900 mb-3 tracking-tight">
+                Company Information
               </h1>
-              <p className="text-base sm:text-lg text-gray-600">
-                {steps[currentStep - 1].description}
+              <p className="text-slate-600 leading-relaxed">
+                Enter your organization name to initialize your workspace. This
+                will be used across all modules and reports.
               </p>
             </div>
 
-            {/* Form Content */}
-            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 sm:p-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {renderStep()}
-
-              {/* Navigation */}
-              <div className="flex items-center gap-3 mt-8 pt-6 border-t border-gray-100">
-                {currentStep > 1 && (
-                  <Button
-                    type="button"
-                    onClick={handleBack}
-                    variant="ghost"
-                    className="text-gray-600 hover:text-gray-900"
+            <div className="bg-white/60 backdrop-blur-sm rounded-lg border border-slate-200/50 p-5 space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                  <svg
+                    className="w-4 h-4 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
-                    ← Back
-                  </Button>
-                )}
-
-                <div className="flex-1" />
-
-                {currentStep < steps.length ? (
-                  <Button
-                    onClick={handleNext}
-                    size="lg"
-                    className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg shadow-blue-500/30 px-8"
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900 mb-1">
+                    Quick Setup
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Additional settings can be configured later from the
+                    administration panel
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                  <svg
+                    className="w-4 h-4 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
-                    Continue
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={loading}
-                    size="lg"
-                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/30 px-8"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Creating workspace...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="w-5 h-5 mr-2" />
-                        Complete Setup
-                      </>
-                    )}
-                  </Button>
-                )}
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900 mb-1">
+                    Secure Environment
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Your data is encrypted and stored securely in compliance
+                    with industry standards
+                  </p>
+                </div>
               </div>
             </div>
+          </div>
 
-            {/* Helper Text */}
-            <div className="text-center mt-6">
-              <p className="text-sm text-gray-500">
-                Press{" "}
-                <kbd className="px-2 py-1 bg-gray-100 rounded text-xs font-mono">
-                  Enter
-                </kbd>{" "}
-                to continue
+          {/* Right Side - Form */}
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
+            <div className="border-b border-slate-200 px-6 py-4">
+              <h3 className="text-sm font-semibold text-slate-900">
+                Organization Details
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Required fields are marked with an asterisk (*)
               </p>
             </div>
+
+            <form onSubmit={hookFormSubmit(onSubmit)} className="p-6 space-y-6">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="name"
+                  className="text-sm font-medium text-slate-700 flex items-center gap-1"
+                >
+                  Company Name
+                  <span className="text-red-600">*</span>
+                </Label>
+                <Input
+                  id="name"
+                  placeholder="Enter your company or organization name"
+                  autoFocus
+                  {...register("name")}
+                  className={`h-11 bg-white border-slate-300 focus:border-blue-500 focus:ring-blue-500 ${
+                    errors.name
+                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                      : ""
+                  }`}
+                  disabled={loading}
+                />
+                {errors.name && (
+                  <p className="text-xs text-red-600 flex items-center gap-1 mt-1">
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    {errors.name.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="pt-4 border-t border-slate-200">
+                <Button
+                  type="submit"
+                  disabled={loading || !isValid}
+                  className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Processing...
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center gap-2">
+                      Continue to Dashboard
+                      <ArrowRight className="w-4 h-4" />
+                    </span>
+                  )}
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
-    </FormProvider>
+    </div>
   );
 };
 

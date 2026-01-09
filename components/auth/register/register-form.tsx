@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PasswordInput from "@/components/ui/password-input";
 import FormDivider from "@/components/auth/shared/form-devider";
+import { authApi } from "@/lib/api/auth";
+import { cookieStorage } from "@/lib/utils/cookies";
 
 const RegisterForm = () => {
   const router = useRouter();
@@ -37,32 +39,37 @@ const RegisterForm = () => {
 
   const onSubmit = async (data: RegisterFormData) => {
     setLoading(true);
-
+    debugger;
     try {
-      // TODO: Replace with your actual API call
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+      const response = await authApi.register({
+        firstName: data.firstName,
+        lastName: data.lastName || undefined,
+        email: data.email,
+        password: data.password,
       });
 
-      if (!response.ok) {
-        throw new Error("Registration failed");
+      if (response.status) {
+        // Store registration data in cookie for OTP resend
+        cookieStorage.setTempRegisterData({
+          firstName: data.firstName,
+          lastName: data.lastName || undefined,
+          email: data.email,
+          password: data.password,
+        });
+
+        toast.success("Registration successful!", {
+          description: response.message,
+        });
+
+        router.push(`/auth/otp-verify?email=${encodeURIComponent(data.email)}`);
+      } else {
+        throw new Error(response.message || "Registration failed");
       }
-
-      await response.json();
-
-      toast.success("Registration completed!", {
-        description: "Please verify your email to continue.",
-      });
-
-      router.push(`/auth/otp-verify?email=${encodeURIComponent(data.email)}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error during registration:", error);
+      const errorMessage = error.response?.data?.message || error.message || "Registration failed";
       toast.error("Registration failed", {
-        description: "Please try again or contact support.",
+        description: errorMessage,
       });
     } finally {
       setLoading(false);

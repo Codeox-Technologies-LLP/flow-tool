@@ -6,10 +6,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { ArrowRight, Mail, ArrowLeft, Loader2 } from "lucide-react";
+import axios from "axios";
 
 import { otpSchema, type OtpFormData } from "@/lib/validations/otp";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { authApi } from "@/lib/api/auth";
+import { cookieStorage } from "@/lib/utils/cookies";
 
 const OtpVerifyForm = () => {
   const router = useRouter();
@@ -100,34 +103,41 @@ const OtpVerifyForm = () => {
     setLoading(true);
 
     try {
-      // TODO: Replace with your actual API call
-      const response = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          otp: data.otp,
-        }),
+      const response = await authApi.verifyOtp({
+        email,
+        otp: data.otp,
       });
 
-      if (!response.ok) {
-        throw new Error("OTP verification failed");
+      if (response.status) {
+        // Store token and user info in cookies
+        cookieStorage.setAuthToken(response.token);
+        cookieStorage.setUserInfo({
+          userId: response.userId,
+          orgId: response.orgId,
+        });
+
+        // Clear temporary registration data
+        cookieStorage.removeTempRegisterData();
+
+        toast.success("Verification successful!", {
+          description: response.message,
+        });
+
+        // Redirect to company setup
+        // Note: We don't set NextAuth session yet - that happens after company setup
+        router.push("/company-setup");
+      } else {
+        throw new Error(response.message || "OTP verification failed");
       }
-
-      await response.json();
-
-      toast.success("Verification successful!", {
-        description: "Your email has been verified.",
-      });
-
-      // Navigate to company setup or dashboard
-      router.push("/company-setup");
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("OTP verification error:", error);
-      toast.error("Invalid OTP", {
-        description: "Please check the code and try again.",
+      const errorMessage = axios.isAxiosError(error) 
+        ? error.response?.data?.message || error.message 
+        : error instanceof Error 
+        ? error.message 
+        : "Invalid OTP";
+      toast.error("Verification failed", {
+        description: errorMessage,
       });
       setOtp(["", "", "", "", "", ""]);
       setValue("otp", "");
@@ -149,32 +159,28 @@ const OtpVerifyForm = () => {
     setLoading(true);
 
     try {
-      // TODO: Replace with your actual API call
-      const response = await fetch("/api/auth/resend-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await authApi.resendOtp(email);
 
-      if (!response.ok) {
-        throw new Error("Failed to resend OTP");
+      if (response.status) {
+        toast.success("New OTP sent!", {
+          description: response.message,
+        });
+        setResendTimer(60);
+        setOtp(["", "", "", "", "", ""]);
+        setValue("otp", "");
+        inputRefs.current[0]?.focus();
+      } else {
+        throw new Error(response.message || "Failed to resend OTP");
       }
-
-      await response.json();
-
-      toast.success("New OTP sent!", {
-        description: "Check your email for the verification code.",
-      });
-      setResendTimer(60);
-      setOtp(["", "", "", "", "", ""]);
-      setValue("otp", "");
-      inputRefs.current[0]?.focus();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Resend OTP error:", error);
-      toast.error("Failed to resend OTP", {
-        description: "Please try again later.",
+      const errorMessage = axios.isAxiosError(error)
+        ? error.response?.data?.message || error.message
+        : error instanceof Error
+        ? error.message
+        : "Failed to resend OTP";
+      toast.error("Resend failed", {
+        description: errorMessage,
       });
     } finally {
       setLoading(false);

@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowRight, Loader2 } from "lucide-react";
+import { signIn } from "next-auth/react";
 
 import { loginSchema, type LoginFormData } from "@/lib/validations/login";
 import { Button } from "@/components/ui/button";
@@ -34,32 +35,27 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-        }),
+      const result = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
       });
 
-      if (!response.ok) {
-        throw new Error("Invalid credentials");
+      if (result?.error) {
+        toast.error("Login failed", {
+          description: "Invalid email or password",
+        });
+      } else {
+        toast.success("Login successful!", {
+          description: "Welcome back!",
+        });
+        router.push("/dashboard");
+        router.refresh();
       }
-
-      await response.json();
-
-      toast.success("Login Successful", {
-        description: "Welcome back! Redirecting to dashboard...",
-      });
-
-      router.push("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
-      toast.error("Login Failed", {
-        description: "Invalid email or password. Please try again.",
+      toast.error("Login failed", {
+        description: "An error occurred. Please try again.",
       });
     } finally {
       setLoading(false);
