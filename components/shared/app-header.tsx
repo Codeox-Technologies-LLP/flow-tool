@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { CompanySwitch } from "./header/company-switch";
 import { Notification } from "./header/notification";
 import { NavProfile } from "./header/nav-profile";
@@ -9,27 +8,14 @@ interface AppHeaderProps {
 }
 
 export async function AppHeader({ userInfo }: AppHeaderProps) {
-  const cookieStore = await cookies();
-  const userInfoCookie = cookieStore.get("user_info")?.value;
-  
-  let userData = null;
-  if (userInfoCookie) {
-    try {
-      userData = JSON.parse(userInfoCookie);
-    } catch (e) {
-      console.error("Failed to parse user info cookie:", e);
-    }
-  }
-
-  // Extract data from userInfo response
+  // Extract data from userInfo response (API data only)
   const companies: Company[] = userInfo?.companies || [];
-  const activeCompanyId = userInfo?.userInfo?.activeCompany || userData?.companyId || "1";
+  const activeCompanyId = userInfo?.userInfo?.activeCompany || "1";
   const activeCompanyName =
     companies.find((c) => c.companyId === activeCompanyId)?.companyName ||
     "My Company";
   const userName =
     userInfo?.userInfo?.basicDetails?.fullName ||
-    userData?.fullName ||
     "User";
 
   console.log("AppHeader - Companies:", companies);

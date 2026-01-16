@@ -1,10 +1,4 @@
-interface Benefit {
-  label: string;
-}
-
-interface KeyBenefitsProps {
-  benefits?: Benefit[];
-}
+import type { Benefit, KeyBenefitsProps } from "@/types/auth";
 
 const defaultBenefits: Benefit[] = [
   { label: "Real-time sync" },

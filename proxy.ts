@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function proxy(req: NextRequest) {
+export default function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   
   // Check for auth token in cookies
-  const hasAuthToken = req.cookies.has("auth_token");
+  const authToken = req.cookies.get("auth_token");
+  const hasAuthToken = !!authToken?.value;
+
+  console.log("🔐 Proxy:", { pathname, hasAuthToken, cookies: req.cookies.getAll() });
 
   // Protected routes
-  const protectedRoutes = ["/app", "/dashboard"];
+  const protectedRoutes = ["/flow-tool", "/dashboard"];
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   );
@@ -30,14 +33,17 @@ export function proxy(req: NextRequest) {
 
   // Protect app routes
   if (isProtectedRoute && !hasAuthToken) {
+    console.log("❌ Redirecting to login - no token");
     return NextResponse.redirect(new URL("/auth/login", req.url));
   }
 
   // Redirect to app if already logged in and trying to access auth pages
   if (isAuthRoute && hasAuthToken) {
+    console.log("✅ Redirecting to app - already logged in");
     return NextResponse.redirect(new URL("/app", req.url));
   }
 
+  console.log("✅ Allowing request to:", pathname);
   return NextResponse.next();
 }
 
