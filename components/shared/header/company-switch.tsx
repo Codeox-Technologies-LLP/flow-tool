@@ -2,18 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Building2, ChevronDown, Check } from "lucide-react";
+import type { CompanySwitchProps, Company } from "@/types/header";
 
-interface Company {
-  companyId: string;
-  companyName: string;
-}
-
-interface CompanySwitchProps {
-  activeCompany?: string;
-  companies?: Company[];
-}
-
-export function CompanySwitch({ activeCompany, companies = [] }: CompanySwitchProps) {
+export function CompanySwitch({
+  activeCompany,
+  companies = [],
+}: CompanySwitchProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -49,7 +43,7 @@ export function CompanySwitch({ activeCompany, companies = [] }: CompanySwitchPr
     try {
       // TODO: Implement company switch API call
       console.log("Switching to company:", companyId);
-      
+
       // Reload the page to fetch new data for the selected company
       // window.location.reload();
     } catch (error) {
@@ -67,17 +61,21 @@ export function CompanySwitch({ activeCompany, companies = [] }: CompanySwitchPr
   return (
     <div className="relative" ref={dropdownRef}>
       <button
-        onClick={() => companies.length > 1 ? setIsOpen(!isOpen) : undefined}
+        onClick={() => (companies.length > 1 ? setIsOpen(!isOpen) : undefined)}
         disabled={isLoading}
         className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-          companies.length > 1 ? 'hover:bg-gray-50 hover:border-gray-300 cursor-pointer' : 'cursor-default'
+          companies.length > 1
+            ? "hover:bg-gray-50 hover:border-gray-300 cursor-pointer"
+            : "cursor-default"
         }`}
         aria-label="Switch company"
         aria-expanded={isOpen}
       >
         <Building2 className="w-4 h-4 text-gray-500" />
         <span className="hidden sm:inline max-w-[120px] lg:max-w-[180px] truncate">
-          {isLoading ? "Switching..." : activeCompanyData?.companyName || "Select Company"}
+          {isLoading
+            ? "Switching..."
+            : activeCompanyData?.companyName || "Select Company"}
         </span>
         {companies.length > 1 && (
           <ChevronDown
@@ -94,7 +92,7 @@ export function CompanySwitch({ activeCompany, companies = [] }: CompanySwitchPr
             <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">
               Switch Company
             </div>
-            <div className="max-h-[300px] overflow-y-auto">
+            <div className="max-h-75 overflow-y-auto">
               {companies.map((company) => {
                 const isActive = company.companyId === activeCompany;
                 return (
@@ -110,14 +108,14 @@ export function CompanySwitch({ activeCompany, companies = [] }: CompanySwitchPr
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <Building2
-                        className={`w-4 h-4 flex-shrink-0 ${
+                        className={`w-4 h-4 shrink-0 ${
                           isActive ? "text-blue-600" : "text-gray-400"
                         }`}
                       />
                       <span className="truncate">{company.companyName}</span>
                     </div>
                     {isActive && (
-                      <Check className="w-4 h-4 text-blue-600 flex-shrink-0 ml-2" />
+                      <Check className="w-4 h-4 text-blue-600 shrink-0 ml-2" />
                     )}
                   </button>
                 );

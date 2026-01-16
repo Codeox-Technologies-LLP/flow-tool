@@ -4,13 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { User, LogOut } from "lucide-react";
 import { cookieStorage } from "@/lib/utils/cookies";
-
-type DropDownItem = {
-  name: string;
-  displayName: string;
-  navigate: string;
-  icon: React.ReactNode;
-};
+import type { NavProfileProps, DropDownItem } from "@/types/header";
 
 const dropDown: DropDownItem[] = [
   {
@@ -27,12 +21,7 @@ const dropDown: DropDownItem[] = [
   },
 ];
 
-interface NavProfileProps {
-  userName?: string;
-  userInitial?: string;
-}
-
-export function NavProfile({ userName, userInitial }: NavProfileProps) {
+export function NavProfile({ userInitial }: NavProfileProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
@@ -72,7 +61,7 @@ export function NavProfile({ userName, userInitial }: NavProfileProps) {
         aria-label="User menu"
         aria-expanded={isOpen}
       >
-        <div className="w-7 h-7 rounded-md bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-semibold text-sm ring-1 ring-gray-200">
+        <div className="w-7 h-7 rounded-md bg-linear-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-semibold text-sm ring-1 ring-gray-200">
           {userInitial || "U"}
         </div>
       </button>

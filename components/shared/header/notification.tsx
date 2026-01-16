@@ -15,18 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-type NotificationModule = "schedule" | "enquiry" | "client";
-
-type Notification = {
-  _id: string;
-  content: string;
-  userId: string;
-  read: boolean;
-  module: NotificationModule;
-  scheduledDate?: string;
-  createdAt: string;
-};
+import type { NotificationModule, Notification } from "@/types/header";
 
 const iconMap: Record<NotificationModule, React.ReactNode> = {
   schedule: <Calendar className="md:w-4 md:h-5 w-5 h-6 text-blue-500" />,
