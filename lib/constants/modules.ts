@@ -12,6 +12,7 @@ export const FOLDER_TO_MODULE_MAP: Record<string, string> = {
   sales: "Sales",
   items: "Items",
   purchase: "Purchase",
+  products: "Products",
   settings: "Settings",
 } as const;
 
@@ -25,5 +26,6 @@ export const MODULE_ROUTES = {
   SALES: "/flow-tool/sales",
   ITEMS: "/flow-tool/items",
   PURCHASE: "/flow-tool/purchase",
+  PRODUCTS: "/flow-tool/products",
   SETTINGS: "/flow-tool/settings",
 } as const;

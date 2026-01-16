@@ -14,7 +14,7 @@ export async function AppHeader({ userInfo }: AppHeaderProps) {
     companies.find((c) => c.companyId === activeCompanyId)?.companyName ||
     "My Company";
   const userName = userInfo?.userInfo?.basicDetails?.fullName || "User";
-
+   console.log("Rendering AppHeader with userInfo:", userInfo);
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-100 w-full">
       <div className="flex items-center justify-between h-14 px-3 sm:px-4 lg:px-6 gap-3">
