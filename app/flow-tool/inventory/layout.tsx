@@ -1,4 +1,5 @@
-import DynamicSidebar from "@/components/flow-tool/dynamic-sidebar";
+import { ModuleSidebar } from "@/components/shared/module-sidebar";
+import { SidebarInset } from "@/components/ui/sidebar";
 import { getUserInfo } from "@/lib/api/server-auth";
 import { get } from "lodash";
 
@@ -11,9 +12,13 @@ export default async function ModuleLayout({
   const moduleItems = get(userInfo, "apps.modules.items", []);
 
   return (
-    <div className="flex h-[calc(100vh-64px)] overflow-hidden">
-      <DynamicSidebar moduleItems={moduleItems} />
-      <main className="flex-1 overflow-y-auto bg-slate-50">{children}</main>
+    <div className="flex w-full">
+      <ModuleSidebar moduleItems={moduleItems} />
+      <SidebarInset className="flex-1">
+        <main className="w-full min-h-[calc(100vh-3.5rem)] bg-slate-50 p-6">
+          {children}
+        </main>
+      </SidebarInset>
     </div>
   );
 }

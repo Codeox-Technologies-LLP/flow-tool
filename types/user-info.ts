@@ -67,3 +67,7 @@ export interface UserInfoResponse {
   companies?: Company[];
   apps?: Apps;
 }
+
+export interface AppHeaderProps {
+  userInfo?: UserInfoResponse | null;
+}

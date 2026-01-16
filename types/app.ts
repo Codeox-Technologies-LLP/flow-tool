@@ -49,15 +49,9 @@ export interface MenuItem {
 }
 
 export interface MenuSubItem {
-  key: string;
+  key?: string;
   displayName: string;
   route: string;
   icon: string;
   matchRoutes?: string[];
-}
-
-export interface ModuleSidebarProps {
-  moduleHeader: string;
-  menuItems: MenuItem[];
-  showSearch?: boolean;
 }

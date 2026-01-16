@@ -1,4 +1,5 @@
 import { AppHeader } from "@/components/shared/app-header";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { getUserInfo } from "@/lib/api/server-auth";
 
 export default async function FlowToolLayout({
@@ -9,9 +10,11 @@ export default async function FlowToolLayout({
   const userInfo = await getUserInfo();
   
   return (
-    <div className="min-h-screen bg-secondary">
-      <AppHeader userInfo={userInfo} />
-      <main>{children}</main>
-    </div>
+    <SidebarProvider>
+      <div className="min-h-screen bg-secondary w-full">
+        <AppHeader userInfo={userInfo} />
+        <main className="w-full">{children}</main>
+      </div>
+    </SidebarProvider>
   );
 }
