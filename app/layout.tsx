@@ -14,8 +14,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Next.js + Tailwind 4 + Zustand',
-  description: 'A modern Next.js app with Tailwind CSS v4 and Zustand',
+  title: 'FlowTool - Streamline Your Business Operations',
+  description: 'A comprehensive business management platform with CRM, inventory, sales, purchase, and product management modules.',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

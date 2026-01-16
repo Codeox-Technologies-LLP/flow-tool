@@ -31,7 +31,8 @@ export function ModuleSidebar({ moduleItems }: ModuleSidebarProps) {
   const currentModulePath = pathSegments[1] || "";
 
   // Find the current module
-  const moduleDisplayName = FOLDER_TO_MODULE_MAP[currentModulePath.toLowerCase()];
+  const moduleDisplayName =
+    FOLDER_TO_MODULE_MAP[currentModulePath.toLowerCase()];
   const currentModule = moduleItems.find(
     (module) =>
       module.displayName?.toLowerCase() === moduleDisplayName?.toLowerCase()
@@ -55,8 +56,9 @@ export function ModuleSidebar({ moduleItems }: ModuleSidebarProps) {
         displayName: sub.displayName,
         route: buildRoute(sub.route),
         icon: sub.icon || "Circle",
-        matchRoutes:
-          sub.matchRoutes?.map(buildRoute) || [buildRoute(sub.route)],
+        matchRoutes: sub.matchRoutes?.map(buildRoute) || [
+          buildRoute(sub.route),
+        ],
       }))
     : [
         {
@@ -77,7 +79,7 @@ export function ModuleSidebar({ moduleItems }: ModuleSidebarProps) {
 
   const isRouteActive = (item: MenuItem | MenuSubItem) => {
     if (pathname === item.route) return true;
-    
+
     if (item.matchRoutes && item.matchRoutes.length > 0) {
       return item.matchRoutes.some((pattern) => {
         if (pathname?.startsWith(pattern)) {
@@ -87,13 +89,16 @@ export function ModuleSidebar({ moduleItems }: ModuleSidebarProps) {
         return false;
       });
     }
-    
+
     return false;
   };
 
   return (
-    <Sidebar collapsible="offcanvas" className="top-14 h-[calc(100vh-3.5rem)] border-t-0">
-      <SidebarHeader className="border-b bg-gradient-to-b from-slate-50 to-white px-4 py-4">
+    <Sidebar
+      collapsible="offcanvas"
+      className="top-14 h-[calc(100vh-3.5rem)] border-t-0"
+    >
+      <SidebarHeader className="border-b bg-linear-to-b from-slate-50 to-white px-4 py-4">
         <div className="flex items-center gap-3">
           <button
             className="group flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 transition-all duration-200 hover:border-slate-300 hover:bg-white hover:shadow-sm cursor-pointer shrink-0"
@@ -105,7 +110,7 @@ export function ModuleSidebar({ moduleItems }: ModuleSidebarProps) {
           <div className="h-8 w-px bg-slate-200 shrink-0" />
           <div className="flex flex-1 items-center gap-2.5 min-w-0">
             {currentModule.icon && (
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-blue-500 to-blue-600 shadow-sm">
                 {(() => {
                   const ModuleIcon = getIcon(currentModule.icon);
                   return <ModuleIcon className="h-5 w-5 text-white" />;
@@ -155,10 +160,14 @@ export function ModuleSidebar({ moduleItems }: ModuleSidebarProps) {
                               >
                                 <SubIcon
                                   className={`w-4 h-4 shrink-0 ${
-                                    subSelected ? "text-blue-600" : "text-slate-500"
+                                    subSelected
+                                      ? "text-blue-600"
+                                      : "text-slate-500"
                                   }`}
                                 />
-                                <span className="truncate">{sub.displayName}</span>
+                                <span className="truncate">
+                                  {sub.displayName}
+                                </span>
                               </SidebarMenuButton>
                             </SidebarMenuItem>
                           );
@@ -188,7 +197,9 @@ export function ModuleSidebar({ moduleItems }: ModuleSidebarProps) {
                           isSelected ? "text-blue-600" : "text-slate-500"
                         }`}
                       />
-                      <span className="truncate flex-1">{item.displayName}</span>
+                      <span className="truncate flex-1">
+                        {item.displayName}
+                      </span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );

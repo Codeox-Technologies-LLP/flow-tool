@@ -5,15 +5,10 @@ import {
   ShoppingBag,
   FileText,
   Users,
-  TrendingUp,
-  TrendingDown,
   DollarSign,
   Target,
-  Calendar,
   Award,
   AlertCircle,
-  CheckCircle2,
-  Clock,
 } from "lucide-react";
 import {
   AreaChart,
@@ -23,8 +18,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -301,7 +294,8 @@ export default function SalesDashboard() {
                       {category.name}
                     </p>
                     <p className="text-xs text-slate-500">
-                      ${(category.amount / 1000).toFixed(0)}K ({category.value}%)
+                      ${(category.amount / 1000).toFixed(0)}K ({category.value}
+                      %)
                     </p>
                   </div>
                 </div>
@@ -318,7 +312,14 @@ export default function SalesDashboard() {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={salesPipelineData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="stage" stroke="#64748b" fontSize={12} angle={-15} textAnchor="end" height={80} />
+              <XAxis
+                dataKey="stage"
+                stroke="#64748b"
+                fontSize={12}
+                angle={-15}
+                textAnchor="end"
+                height={80}
+              />
               <YAxis stroke="#64748b" fontSize={12} />
               <Tooltip
                 contentStyle={{
@@ -329,7 +330,12 @@ export default function SalesDashboard() {
                 }}
               />
               <Legend />
-              <Bar dataKey="count" fill="#3b82f6" name="Opportunities" radius={[8, 8, 0, 0]} />
+              <Bar
+                dataKey="count"
+                fill="#3b82f6"
+                name="Opportunities"
+                radius={[8, 8, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -342,9 +348,21 @@ export default function SalesDashboard() {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={topProductsData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="product" stroke="#64748b" fontSize={12} angle={-45} textAnchor="end" height={80} />
+              <XAxis
+                dataKey="product"
+                stroke="#64748b"
+                fontSize={12}
+                angle={-45}
+                textAnchor="end"
+                height={80}
+              />
               <YAxis yAxisId="left" stroke="#64748b" fontSize={12} />
-              <YAxis yAxisId="right" orientation="right" stroke="#64748b" fontSize={12} />
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                stroke="#64748b"
+                fontSize={12}
+              />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "#fff",
@@ -354,8 +372,20 @@ export default function SalesDashboard() {
                 }}
               />
               <Legend />
-              <Bar yAxisId="left" dataKey="sales" fill="#10b981" name="Units Sold" radius={[8, 8, 0, 0]} />
-              <Bar yAxisId="right" dataKey="revenue" fill="#3b82f6" name="Revenue ($)" radius={[8, 8, 0, 0]} />
+              <Bar
+                yAxisId="left"
+                dataKey="sales"
+                fill="#10b981"
+                name="Units Sold"
+                radius={[8, 8, 0, 0]}
+              />
+              <Bar
+                yAxisId="right"
+                dataKey="revenue"
+                fill="#3b82f6"
+                name="Revenue ($)"
+                radius={[8, 8, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>

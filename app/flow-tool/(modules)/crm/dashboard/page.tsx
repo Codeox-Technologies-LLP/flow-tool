@@ -6,14 +6,11 @@ import {
   UserPlus,
   Building2,
   TrendingUp,
-  PhoneCall,
   Mail,
   DollarSign,
   Calendar,
   Target,
-  CheckCircle2,
   Clock,
-  AlertCircle,
 } from "lucide-react";
 import {
   AreaChart,
@@ -321,7 +318,13 @@ export default function CRMDashboard() {
             <BarChart data={pipelineStages} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis type="number" stroke="#64748b" fontSize={12} />
-              <YAxis dataKey="stage" type="category" stroke="#64748b" fontSize={12} width={100} />
+              <YAxis
+                dataKey="stage"
+                type="category"
+                stroke="#64748b"
+                fontSize={12}
+                width={100}
+              />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "#fff",
@@ -331,7 +334,12 @@ export default function CRMDashboard() {
                 }}
               />
               <Legend />
-              <Bar dataKey="count" fill="#3b82f6" name="Deals" radius={[0, 8, 8, 0]} />
+              <Bar
+                dataKey="count"
+                fill="#3b82f6"
+                name="Deals"
+                radius={[0, 8, 8, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
