@@ -3,7 +3,11 @@ import { SidebarInset } from "@/components/ui/sidebar";
 import { getUserInfo } from "@/lib/api/server-auth";
 import { get } from "lodash";
 
-export default async function ModuleLayout({
+/**
+ * Shared module layout wrapper
+ * Used by all module routes (inventory, crm, sales, items, purchase, settings)
+ */
+export async function ModuleLayoutWrapper({
   children,
 }: {
   children: React.ReactNode;
