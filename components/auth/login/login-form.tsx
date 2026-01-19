@@ -62,8 +62,20 @@ export default function LoginForm() {
         const userId = get(response, "user.userId", "");
         const orgId = get(response, "user.orgId", "");
         const fullName = get(response, "user.fullName", "User");
+        const email = get(response, "user.email", "");
+        const companyId = get(response, "user.activeCompany", "");
+        const roleId = get(response, "user.appRole", "");
+        const orgRole = get(response, "user.orgRole", "");
 
-        cookieStorage.setUserInfo({ userId, orgId });
+        cookieStorage.setUserInfo({ 
+          userId, 
+          orgId, 
+          fullName, 
+          email, 
+          companyId, 
+          roleId, 
+          orgRole 
+        });
 
         toast.success("Login successful!", {
           description: `Welcome back, ${fullName}!`,

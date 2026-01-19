@@ -1,0 +1,589 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import {
+  Warehouse,
+  Plus,
+  Search,
+  MoreVertical,
+  Edit,
+  Trash2,
+  MapPin,
+  Package,
+  Users,
+  TrendingUp,
+  Building2,
+  Mail,
+  Globe,
+  Download,
+  Upload,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import { warehouseApi, type Warehouse as WarehouseType } from "@/lib/api/warehouse";
+import { toast } from "sonner";
+
+export default function WarehousePage() {
+  const [warehouses, setWarehouses] = useState<WarehouseType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [deleteDialog, setDeleteDialog] = useState(false);
+  const [selectedWarehouse, setSelectedWarehouse] = useState<string | null>(
+    null
+  );
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState<1 | -1>(1);
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput);
+      setPage(1); // Reset to first page on new search
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // Fetch warehouses from API
+  const fetchWarehouses = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await warehouseApi.list({
+        page,
+        limit,
+        search: searchQuery || undefined,
+        sortBy,
+        sortOrder,
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        type: typeFilter !== "all" ? typeFilter : undefined,
+      });
+
+      if (response.status && response.data) {
+        setWarehouses(response.data.warehouses);
+        setTotal(response.data.total);
+      } else {
+        setError(response.message || "Failed to fetch warehouses");
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to fetch warehouses");
+      console.error("Error fetching warehouses:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch warehouses on component mount and when filters change
+  useEffect(() => {
+    fetchWarehouses();
+  }, [page, limit, searchQuery, sortBy, sortOrder, statusFilter, typeFilter]);
+
+  // Calculate summary stats
+  const stats = {
+    total: warehouses.length,
+    active: warehouses.filter((w) => w.status === "active").length,
+    totalCapacity: warehouses.reduce((sum, w) => sum + w.capacity, 0),
+    totalOccupied: warehouses.reduce((sum, w) => sum + w.occupied, 0),
+    avgUtilization: warehouses.length > 0
+      ? Math.round(
+          warehouses.reduce((sum, w) => sum + w.utilization, 0) /
+            warehouses.length
+        )
+      : 0,
+  };
+
+  // Filter warehouses (now done on server, but keep for local filtering if needed)
+  const filteredWarehouses = warehouses;
+
+  const handleDelete = async (id: string) => {
+    setSelectedWarehouse(id);
+    setDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedWarehouse) return;
+
+    try {
+      const response = await warehouseApi.delete(selectedWarehouse);
+      if (response.status) {
+        toast.success("Warehouse deleted successfully");
+        fetchWarehouses(); // Refresh the list
+      } else {
+        toast.error(response.message || "Failed to delete warehouse");
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to delete warehouse");
+      console.error("Error deleting warehouse:", err);
+    } finally {
+      setDeleteDialog(false);
+      setSelectedWarehouse(null);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    return status === "active" ? (
+      <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+        Active
+      </Badge>
+    ) : (
+      <Badge variant="secondary">Inactive</Badge>
+    );
+  };
+
+  const getTypeBadge = (type: string) => {
+    const typeColors: Record<string, string> = {
+      distribution: "bg-blue-100 text-blue-700 hover:bg-blue-100",
+      storage: "bg-purple-100 text-purple-700 hover:bg-purple-100",
+      fulfillment: "bg-orange-100 text-orange-700 hover:bg-orange-100",
+    };
+
+    return (
+      <Badge className={typeColors[type] || "bg-gray-100 text-gray-700"}>
+        {type.charAt(0).toUpperCase() + type.slice(1)}
+      </Badge>
+    );
+  };
+
+  const getUtilizationColor = (utilization: number) => {
+    if (utilization >= 90) return "text-red-600";
+    if (utilization >= 75) return "text-orange-600";
+    if (utilization >= 50) return "text-green-600";
+    return "text-blue-600";
+  };
+
+  return (
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Warehouses</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your warehouse locations and inventory centers
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+          <Button variant="outline" size="sm">
+            <Upload className="h-4 w-4 mr-2" />
+            Import
+          </Button>
+          <Button variant="outline">
+            <Plus className="h-4 w-4 mr-2"  />
+            Add Warehouse
+          </Button>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Warehouses
+            </CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <>
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-24" />
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{total}</div>
+                <p className="text-xs text-muted-foreground">
+                  {stats.active} active locations
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Capacity
+            </CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <>
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-24" />
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-bold">
+                  {(stats.totalCapacity / 1000).toFixed(0)}K
+                </div>
+                <p className="text-xs text-muted-foreground">sq ft available</p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Space Occupied
+            </CardTitle>
+            <Warehouse className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <>
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-24" />
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-bold">
+                  {(stats.totalOccupied / 1000).toFixed(0)}K
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {stats.totalCapacity > 0
+                    ? ((stats.totalOccupied / stats.totalCapacity) * 100).toFixed(1)
+                    : 0}%
+                  of total capacity
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Avg Utilization
+            </CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <>
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-24" />
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{stats.avgUtilization}%</div>
+                <p className="text-xs text-muted-foreground">
+                  Across all warehouses
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters and Search */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle>Warehouse List</CardTitle>
+              <CardDescription>
+                {loading ? (
+                  <Skeleton className="h-4 w-32" />
+                ) : (
+                  `${total} warehouse${total !== 1 ? "s" : ""} found`
+                )}
+              </CardDescription>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search warehouses..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-full sm:w-40">
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="distribution">Distribution</SelectItem>
+                  <SelectItem value="storage">Storage</SelectItem>
+                  <SelectItem value="fulfillment">Fulfillment</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-40">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* Error Alert */}
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="space-y-4">
+            {loading ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex items-center space-x-4">
+                    <Skeleton className="h-12 w-12 rounded-lg" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-4 w-[250px]" />
+                      <Skeleton className="h-4 w-[200px]" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredWarehouses.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Warehouse className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold">No warehouses found</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Try adjusting your search or filters
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-md border">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b bg-muted/50">
+                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                          Warehouse ID
+                        </th>
+                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                          Name & Location
+                        </th>
+                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                          Manager
+                        </th>
+                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                          Capacity
+                        </th>
+                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                          Utilization
+                        </th>
+                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                          Type
+                        </th>
+                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                          Status
+                        </th>
+                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredWarehouses.map((warehouse) => (
+                        <tr
+                          key={warehouse.id}
+                          className="border-b transition-colors hover:bg-muted/50"
+                        >
+                          <td className="p-4 align-middle">
+                            <div className="flex items-center gap-2">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                <Warehouse className="h-5 w-5 text-primary" />
+                              </div>
+                              <span className="font-medium">
+                                {warehouse.id}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="p-4 align-middle">
+                            <div>
+                              <div className="font-medium">
+                                {warehouse.name}
+                              </div>
+                              <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                                <MapPin className="h-3 w-3" />
+                                {warehouse.location}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4 align-middle">
+                            <div>
+                              <div className="font-medium">
+                                {warehouse.manager}
+                              </div>
+                              <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                                <Mail className="h-3 w-3" />
+                                {warehouse.email}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4 align-middle">
+                            <div>
+                              <div className="font-medium">
+                                {warehouse.capacity.toLocaleString()} sq ft
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {warehouse.occupied.toLocaleString()} occupied
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4 align-middle">
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1">
+                                <div
+                                  className={`text-lg font-bold ${getUtilizationColor(
+                                    warehouse.utilization
+                                  )}`}
+                                >
+                                  {warehouse.utilization}%
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                  <div
+                                    className={`h-2 rounded-full ${
+                                      warehouse.utilization >= 90
+                                        ? "bg-red-600"
+                                        : warehouse.utilization >= 75
+                                        ? "bg-orange-600"
+                                        : warehouse.utilization >= 50
+                                        ? "bg-green-600"
+                                        : "bg-blue-600"
+                                    }`}
+                                    style={{
+                                      width: `${warehouse.utilization}%`,
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4 align-middle">
+                            {getTypeBadge(warehouse.type)}
+                          </td>
+                          <td className="p-4 align-middle">
+                            {getStatusBadge(warehouse.status)}
+                          </td>
+                          <td className="p-4 align-middle">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem>
+                                  <Globe className="h-4 w-4 mr-2" />
+                                  View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Edit Warehouse
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <MapPin className="h-4 w-4 mr-2" />
+                                  Manage Zones
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Users className="h-4 w-4 mr-2" />
+                                  Manage Staff
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => handleDelete(warehouse.id)}
+                                  className="text-red-600"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialog} onOpenChange={setDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              warehouse and remove all associated data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}

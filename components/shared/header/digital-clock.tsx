@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 
 export function DigitalClock() {
   const [time, setTime] = useState(new Date());
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const timer = setInterval(() => {
       setTime(new Date());
     }, 1000);
@@ -29,6 +31,18 @@ export function DigitalClock() {
       day: "numeric",
     });
   };
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return (
+      <div className="flex items-center gap-2 justify-center px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="text-xs text-slate-500 invisible">Wed, Jan 16</div>
+        <div className="text-sm font-semibold text-slate-900 tabular-nums invisible">
+          00:00:00 AM
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-2 justify-center px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200">
