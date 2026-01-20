@@ -1,4 +1,4 @@
-import { apiClient } from "../axios";
+import { apiClient } from "@/api/axios";
 import type { WarehouseAuditResponse } from "@/types/warehouse";
 
 export interface TableHeader {

@@ -30,6 +30,7 @@ export interface WarehouseAnalyticsCardsProps {
   analytics: {
     summary: WarehouseAnalyticsSummary;
   } | null | undefined;
+  loading?: boolean;
 }
 
 export interface WarehouseEditFormProps {

@@ -23,7 +23,6 @@ export interface Company {
 
 export interface Apps {
   modules: AppSection;
-  reports: AppSection;
 }
 
 export interface AppSection {
@@ -42,7 +41,7 @@ export interface AppItem {
 }
 
 export interface AppSubItem {
-  key?: string;
+  key: string;
   displayName: string;
   route: string;
   icon: string;
@@ -50,9 +49,7 @@ export interface AppSubItem {
 }
 
 export interface UserInfoResponse {
-  status?: boolean;
-  message?: string;
-  userInfo?: {
+  userInfo: {
     _id: string;
     userId: string;
     orgId: string;
@@ -64,8 +61,8 @@ export interface UserInfoResponse {
     appRole: string;
     activeCompany: string;
   };
-  companies?: Company[];
-  apps?: Apps;
+  companies: Company[];
+  apps: Apps;
 }
 
 export interface AppHeaderProps {

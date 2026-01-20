@@ -1,94 +1,14 @@
-import { apiClient } from "./axios";
+import { apiClient } from "@/api/axios";
 import { cookieStorage } from "@/lib/utils/cookies";
-
-export interface RegisterRequest {
-  firstName: string;
-  lastName?: string;
-  email: string;
-  password: string;
-}
-
-export interface RegisterResponse {
-  status: boolean;
-  message: string;
-}
-
-export interface VerifyOtpRequest {
-  email: string;
-  otp: string;
-}
-
-export interface VerifyOtpResponse {
-  status: boolean;
-  message: string;
-  orgId: string;
-  userId: string;
-  token: string;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface LoginSuccessResponse {
-  status: boolean;
-  message: string;
-  token: string;
-  user: {
-    userId: string;
-    orgId: string;
-    fullName: string;
-    email: string;
-    appRole: string;
-    orgRole: string;
-    activeCompany: string;
-  };
-}
-
-export interface LoginRedirectResponse {
-  status: boolean;
-  message: string;
-  token: string;
-  redirectUrl: string;
-}
-
-export type LoginResponse = LoginSuccessResponse | LoginRedirectResponse;
-
-export interface UserInfoResponse {
-  userInfo: {
-    _id: string;
-    userId: string;
-    orgId: string;
-    basicDetails: {
-      fullName: string;
-      email: string;
-    };
-    orgRole: string;
-    appRole: string;
-    activeCompany: string;
-  };
-  companies: Array<{
-    companyId: string;
-    companyName: string;
-  }>;
-  sideBarItems: {
-    modules: {
-      header: string;
-      search: boolean;
-      items: any[];
-    };
-    reports: {
-      header: string;
-      search: boolean;
-      items: Array<{
-        displayName: string;
-        route: string;
-        icon: string;
-      }>;
-    };
-  };
-}
+import type { UserInfoResponse } from "@/types/user-info";
+import type {
+  RegisterRequest,
+  RegisterResponse,
+  VerifyOtpRequest,
+  VerifyOtpResponse,
+  LoginRequest,
+  LoginResponse,
+} from "@/types/auth";
 
 export const authApi = {
   register: async (data: RegisterRequest): Promise<RegisterResponse> => {

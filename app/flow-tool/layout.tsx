@@ -8,7 +8,7 @@ export default async function FlowToolLayout({
   children: React.ReactNode;
 }) {
   const userInfo = await getUserInfo();
-  
+  console.log("userInfo in layout:", userInfo);
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-secondary w-full">

@@ -132,9 +132,7 @@ export default function WarehousePage() {
 
   return (
     <div className="space-y-6 p-6">
-      {warehouses?.analytics && (
-        <WarehouseAnalyticsCards analytics={warehouses.analytics} />
-      )}
+      <WarehouseAnalyticsCards analytics={warehouses?.analytics} loading={loading} />
 
       <DataTable
         title="Warehouses"
