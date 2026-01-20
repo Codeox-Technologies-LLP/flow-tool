@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getWarehouseDetail, getWarehouseAudit } from "@/lib/api/server-warehouse";
 import { PageHeader } from "@/components/shared/page-header";
 import { SplitLayout } from "@/components/shared/split-layout";
-import { WarehouseEditForm } from "@/components/inventory/warehouse/warehouse-edit-form";
+import { WarehouseForm } from "@/components/inventory/warehouse/warehouse-form";
 import { WarehouseAuditLog } from "@/components/inventory/warehouse/warehouse-audit-log";
 
 interface EditWarehousePageProps {
@@ -37,7 +37,7 @@ export default async function EditWarehousePage({ params }: EditWarehousePagePro
       <SplitLayout
         sidePanel={<WarehouseAuditLog auditData={auditData} />}
       >
-        <WarehouseEditForm warehouse={detailResponse.data} warehouseId={id} />
+        <WarehouseForm mode="edit" warehouse={detailResponse.data} warehouseId={id} />
       </SplitLayout>
     </div>
   );

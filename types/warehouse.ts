@@ -13,3 +13,8 @@ export interface WarehouseAnalyticsCardsProps {
     summary: WarehouseAnalyticsSummary;
   } | null | undefined;
 }
+
+export interface WarehouseEditFormProps {
+  warehouse: import("@/lib/api/warehouse").WarehouseData;
+  warehouseId: string;
+}

@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import AuditLog from "@/components/shared/audit-log";
+import AuditLog, { type AuditLogEntry } from "@/components/shared/audit-log";
 
 interface SplitLayoutProps {
   children: ReactNode;
@@ -36,7 +36,7 @@ export function SplitLayout({
 // Convenience wrapper for layouts with audit log
 interface SplitLayoutWithAuditProps {
   children: ReactNode;
-  auditEntries?: any[];
+  auditEntries?: AuditLogEntry[];
   sidePanelWidth?: string;
 }
 
