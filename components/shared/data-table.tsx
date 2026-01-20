@@ -7,7 +7,6 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Loader2,
   AlertCircle,
   ArrowUpDown,
   ArrowUp,
@@ -25,64 +24,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-export interface TableHeader {
-  name: string;
-  displayName: string;
-  sort?: boolean;
-  sortOrder?: number;
-}
-
-export interface TableComponent {
-  name: string;
-  displayName: string;
-  component: "text" | "action" | "badge" | "custom" | "number" | "currency" | "status";
-}
-
-export interface ActionItem {
-  name: string;
-  icon: string;
-  displayName: string;
-  id: string;
-}
-
-export interface Tool {
-  name: string;
-  displayName: string;
-  icon: string;
-  bgColor?: string;
-  txtColor?: string;
-  width?: string;
-}
-
-export interface DataTableProps {
-  title: string;
-  description?: string;
-  tools?: Tool[];
-  tableHeaders: TableHeader[];
-  components: TableComponent[];
-  data: any[];
-  loading?: boolean;
-  error?: string | null;
-  searchable?: boolean;
-  pageable?: boolean;
-  totalPages?: number;
-  currentPage?: number;
-  totalRecords?: number;
-  onSearch?: (query: string) => void;
-  onPageChange?: (page: number) => void;
-  onSort?: (field: string, order: number) => void;
-  onAction?: (action: string, id: string) => void;
-  onToolClick?: (toolName: string) => void;
-  renderCustomCell?: (item: any, component: TableComponent) => React.ReactNode;
-}
+import { DataTableProps, TableComponent } from "@/types/data-table";
 
 export function DataTable({
   title,
@@ -131,11 +73,23 @@ export function DataTable({
     }
   };
 
-  const renderCell = (item: any, component: TableComponent) => {
+  const renderCell = (item: Record<string, unknown>, component: TableComponent) => {
     const value = item[component.name];
 
     if (component.component === "action") {
-      if (value && typeof value === "object" && value.name) {
+      // Type guard for action items
+      const isActionItem = (val: unknown): val is { name: string; id: string; displayName: string; icon: string } => {
+        return (
+          typeof val === "object" &&
+          val !== null &&
+          "name" in val &&
+          "id" in val &&
+          typeof (val as Record<string, unknown>).name === "string" &&
+          typeof (val as Record<string, unknown>).id === "string"
+        );
+      };
+
+      if (isActionItem(value)) {
         // Render action button based on action type
         if (value.name === "edit") {
           return (
@@ -221,7 +175,7 @@ export function DataTable({
     if (component.component === "badge") {
       return (
         <Badge variant="secondary" className="font-normal">
-          {value || 0}
+          {String(value ?? 0)}
         </Badge>
       );
     }
@@ -229,7 +183,7 @@ export function DataTable({
     if (component.component === "number") {
       return (
         <span className="text-sm font-medium text-gray-900">
-          {typeof value === "number" ? value.toLocaleString() : value || 0}
+          {typeof value === "number" ? value.toLocaleString() : String(value ?? 0)}
         </span>
       );
     }
@@ -266,7 +220,7 @@ export function DataTable({
     }
 
     // Default text rendering
-    return <span className="text-sm text-gray-700">{value || "-"}</span>;
+    return <span className="text-sm text-gray-700">{value != null ? String(value) : "-"}</span>;
   };
 
   const getSortIcon = (headerName: string) => {
@@ -393,7 +347,7 @@ export function DataTable({
                   <tbody className="bg-white">
                     {data.map((item, index) => (
                       <tr
-                        key={item.id || index}
+                        key={typeof item.id === "string" || typeof item.id === "number" ? item.id : index}
                         className="border-b border-gray-100 transition-colors hover:bg-gray-50/50 last:border-0"
                       >
                         {components.map((component) => (
@@ -476,3 +430,26 @@ export function DataTable({
     </div>
   );
 }
+
+
+// Usage Example
+
+// <DataTable
+//   title="Warehouses"
+//   description="Manage your warehouse locations and inventory centers"
+//   tools={get(warehouses, 'tools', [])}
+//   tableHeaders={get(warehouses, 'result.tableHeader', [])}
+//   components={get(warehouses, 'result.components', [])}
+//   data={get(warehouses, 'result.data', [])}
+//   loading={loading}
+//   error={error}
+//   searchable={get(warehouses, 'result.search', true)}
+//   pageable={get(warehouses, 'result.pagination', true)}
+//   totalPages={get(warehouses, 'result.totalPages', 1)}
+//   currentPage={get(warehouses, 'result.currentPage', 1)}
+//   totalRecords={get(warehouses, 'result.totalRecords', 0)}
+//   onSearch={handleSearch}
+//   onPageChange={handlePageChange}
+//   onSort={handleSort}
+//   onAction={handleAction}
+//

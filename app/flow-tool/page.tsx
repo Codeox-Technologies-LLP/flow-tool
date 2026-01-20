@@ -2,7 +2,7 @@ import * as LucideIcons from "lucide-react";
 import { getUserInfo } from "@/lib/api/server-auth";
 import { get } from "lodash";
 import type { LucideIcon } from "lucide-react";
-import AppCard from "@/components/flow-tool/app-card";
+import AppCard from "@/components/app-drawer/app-card";
 import BackgroundGrid from "@/components/shared/background-grid";
 
 export default async function AppPage() {

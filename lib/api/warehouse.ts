@@ -10,7 +10,7 @@ export interface TableHeader {
 export interface TableComponent {
   name: string;
   displayName: string;
-  component: string;
+  component: "text" | "action" | "badge" | "custom" | "number" | "currency" | "status";
 }
 
 export interface Tool {
@@ -20,9 +20,10 @@ export interface Tool {
   bgColor?: string;
   txtColor?: string;
   width?: string;
+  route?: string;
 }
 
-export interface WarehouseData {
+export interface WarehouseData extends Record<string, unknown> {
   id: string;
   warehouseId: string;
   name: string;
@@ -37,9 +38,9 @@ export interface WarehouseData {
   lowStockAlerts: number;
   outOfStockAlerts: number;
   status: string;
-  edit?: any;
-  delete?: any;
-  view?: any;
+  edit?: unknown;
+  delete?: unknown;
+  view?: unknown;
 }
 
 export interface WarehouseAnalytics {
@@ -105,8 +106,20 @@ export const warehouseApi = {
     return response.data;
   },
 
+  create: async (data: any): Promise<{ status: boolean; message: string; warehouseId?: string }> => {
+    const response = await apiClient.post("/warehouse/create", data);
+    return response.data;
+  },
+
+  edit: async (id: string, data: any): Promise<{ status: boolean; message: string; data?: any }> => {
+    const response = await apiClient.put(`/warehouse/edit/${id}`, data);
+    return response.data;
+  },
+
   delete: async (id: string): Promise<{ status: boolean; message: string }> => {
-    const response = await apiClient.delete(`/warehouse/${id}`);
+    const response = await apiClient.delete(`/warehouse/delete`, {
+      data: { ids: [id] }
+    });
     return response.data;
   },
 };

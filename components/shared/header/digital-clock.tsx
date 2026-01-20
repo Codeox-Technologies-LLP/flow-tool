@@ -3,16 +3,22 @@
 import { useState, useEffect } from "react";
 
 export function DigitalClock() {
-  const [time, setTime] = useState(new Date());
-  const [mounted, setMounted] = useState(false);
+  // Initialize with null to prevent hydration mismatch
+  const [time, setTime] = useState<Date | null>(null);
 
   useEffect(() => {
-    setMounted(true);
-    const timer = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
+    // This is acceptable: subscribing to an external system (timer)
+    // and updating state in the callback
+    const updateTime = () => setTime(new Date());
+    
+    // Set initial time
+    updateTime();
+    
+    // Subscribe to interval updates
+    const timer = setInterval(updateTime, 1000);
 
     return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatTime = (date: Date) => {
@@ -32,8 +38,8 @@ export function DigitalClock() {
     });
   };
 
-  // Prevent hydration mismatch by not rendering until mounted
-  if (!mounted) {
+  // Prevent hydration mismatch by not rendering until time is set
+  if (!time) {
     return (
       <div className="flex items-center gap-2 justify-center px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200">
         <div className="text-xs text-slate-500 invisible">Wed, Jan 16</div>

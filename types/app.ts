@@ -48,6 +48,18 @@ export interface MenuItem {
   subItems?: MenuSubItem[];
 }
 
+export interface ConfirmationDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+  title?: string;
+  description?: string;
+  confirmText?: string;
+  cancelText?: string;
+  variant?: "destructive" | "default";
+  loading?: boolean;
+}
+
 export interface MenuSubItem {
   key?: string;
   displayName: string;
