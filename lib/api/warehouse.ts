@@ -106,12 +106,17 @@ export const warehouseApi = {
     return response.data;
   },
 
-  create: async (data: any): Promise<{ status: boolean; message: string; warehouseId?: string }> => {
+  detail: async (id: string): Promise<{ status: boolean; data: WarehouseData }> => {
+    const response = await apiClient.get(`/warehouse/detail/${id}`);
+    return response.data;
+  },
+
+  create: async (data: Record<string, unknown>): Promise<{ status: boolean; message: string; warehouseId?: string }> => {
     const response = await apiClient.post("/warehouse/create", data);
     return response.data;
   },
 
-  edit: async (id: string, data: any): Promise<{ status: boolean; message: string; data?: any }> => {
+  edit: async (id: string, data: Record<string, unknown>): Promise<{ status: boolean; message: string; data?: WarehouseData }> => {
     const response = await apiClient.put(`/warehouse/edit/${id}`, data);
     return response.data;
   },
@@ -120,6 +125,11 @@ export const warehouseApi = {
     const response = await apiClient.delete(`/warehouse/delete`, {
       data: { ids: [id] }
     });
+    return response.data;
+  },
+
+  audit: async (id: string): Promise<{ status: boolean; message: string; data: any[] }> => {
+    const response = await apiClient.get(`/warehouse/audit/${id}`);
     return response.data;
   },
 };

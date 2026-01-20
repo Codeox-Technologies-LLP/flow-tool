@@ -11,8 +11,6 @@ import Link from "next/link";
 import { warehouseSchema, type WarehouseFormData } from "@/lib/validations/warehouse";
 import { warehouseApi } from "@/lib/api/warehouse";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -20,8 +18,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import AuditLog from "@/components/shared/audit-log";
 import { PageHeader } from "@/components/shared/page-header";
+import { FormField } from "@/components/shared/form-field";
+import { SplitLayoutWithAudit } from "@/components/shared/split-layout";
 
 export default function AddWarehousePage() {
   const router = useRouter();
@@ -42,7 +41,6 @@ export default function AddWarehousePage() {
       country: "",
       state: "",
       city: "",
-      zipCode: "",
     },
   });
 
@@ -88,12 +86,10 @@ export default function AddWarehousePage() {
       />
 
       {/* Split Screen Content */}
-      <div className="flex-1 overflow-hidden flex gap-4 p-4">
-        {/* Left Panel - Form */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="space-y-4">
-            {/* Form Fields */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" id="warehouse-form">
+      <SplitLayoutWithAudit>
+        <div className="space-y-4">
+          {/* Form Fields */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" id="warehouse-form">
             {/* Single Card with All Fields */}
             <Card className="shadow-sm">
               <CardHeader className="border-b bg-white py-4">
@@ -107,134 +103,72 @@ export default function AddWarehousePage() {
               <CardContent className="pt-4 pb-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   {/* Warehouse Name */}
-                  <div className="space-y-1.5 md:col-span-2">
-                    <Label htmlFor="name" className="text-sm font-medium text-gray-700">
-                      Warehouse Name <span className="text-red-600">*</span>
-                    </Label>
-                    <Input
-                      id="name"
-                      placeholder="e.g., Main Warehouse"
-                      className="h-9 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                      {...register("name")}
-                      autoFocus
-                    />
-                    {errors.name && (
-                      <p className="text-sm text-red-600">{errors.name.message}</p>
-                    )}
-                  </div>
+                  <FormField
+                    id="name"
+                    label="Warehouse Name"
+                    placeholder="e.g., Main Warehouse"
+                    required
+                    error={errors.name}
+                    register={register("name")}
+                    fullWidth
+                    autoFocus
+                  />
 
                   {/* Short Code */}
-                  <div className="space-y-1.5">
-                    <Label htmlFor="shortCode" className="text-sm font-medium text-gray-700">
-                      Short Code
-                    </Label>
-                    <Input
-                      id="shortCode"
-                      placeholder="e.g., WH-001"
-                      className="h-9 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                      {...register("shortCode")}
-                    />
-                    {errors.shortCode && (
-                      <p className="text-sm text-red-600">{errors.shortCode.message}</p>
-                    )}
-                  </div>
+                  <FormField
+                    id="shortCode"
+                    label="Short Code"
+                    placeholder="e.g., WH-001"
+                    error={errors.shortCode}
+                    register={register("shortCode")}
+                  />
 
                   {/* Phone */}
-                  <div className="space-y-1.5">
-                    <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
-                      Phone Number
-                    </Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="e.g., +1234567890"
-                      className="h-9 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                      {...register("phone")}
-                    />
-                    {errors.phone && (
-                      <p className="text-sm text-red-600">{errors.phone.message}</p>
-                    )}
-                  </div>
+                  <FormField
+                    id="phone"
+                    label="Phone Number"
+                    type="tel"
+                    placeholder="e.g., +1234567890"
+                    error={errors.phone}
+                    register={register("phone")}
+                  />
 
                   {/* Address */}
-                  <div className="space-y-1.5 md:col-span-2">
-                    <Label htmlFor="address" className="text-sm font-medium text-gray-700">
-                      Street Address
-                    </Label>
-                    <Input
-                      id="address"
-                      placeholder="e.g., 123 Storage Lane"
-                      className="h-9 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                      {...register("address")}
-                    />
-                    {errors.address && (
-                      <p className="text-sm text-red-600">{errors.address.message}</p>
-                    )}
-                  </div>
+                  <FormField
+                    id="address"
+                    label="Street Address"
+                    placeholder="e.g., 123 Storage Lane"
+                    error={errors.address}
+                    register={register("address")}
+                    fullWidth
+                  />
 
                   {/* City */}
-                  <div className="space-y-1.5">
-                    <Label htmlFor="city" className="text-sm font-medium text-gray-700">
-                      City
-                    </Label>
-                    <Input
-                      id="city"
-                      placeholder="e.g., Los Angeles"
-                      className="h-9 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                      {...register("city")}
-                    />
-                    {errors.city && (
-                      <p className="text-sm text-red-600">{errors.city.message}</p>
-                    )}
-                  </div>
+                  <FormField
+                    id="city"
+                    label="City"
+                    placeholder="e.g., Los Angeles"
+                    error={errors.city}
+                    register={register("city")}
+                  />
 
                   {/* State */}
-                  <div className="space-y-1.5">
-                    <Label htmlFor="state" className="text-sm font-medium text-gray-700">
-                      State
-                    </Label>
-                    <Input
-                      id="state"
-                      placeholder="e.g., CA"
-                      className="h-9 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                      {...register("state")}
-                    />
-                    {errors.state && (
-                      <p className="text-sm text-red-600">{errors.state.message}</p>
-                    )}
-                  </div>
-
-                  {/* ZIP Code */}
-                  <div className="space-y-1.5">
-                    <Label htmlFor="zipCode" className="text-sm font-medium text-gray-700">
-                      ZIP Code
-                    </Label>
-                    <Input
-                      id="zipCode"
-                      placeholder="e.g., 90001"
-                      className="h-9 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                      {...register("zipCode")}
-                    />
-                    {errors.zipCode && (
-                      <p className="text-sm text-red-600">{errors.zipCode.message}</p>
-                    )}
-                  </div>
+                  <FormField
+                    id="state"
+                    label="State"
+                    placeholder="e.g., CA"
+                    error={errors.state}
+                    register={register("state")}
+                  />
 
                   {/* Country */}
-                  <div className="space-y-1.5">
-                    <Label htmlFor="country" className="text-sm font-medium text-gray-700">
-                      Country
-                    </Label>
-                    <Input
-                      id="country"
-                      placeholder="e.g., USA"
-                      className="h-9 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                      {...register("country")}
-                    />
-                    {errors.country && (
-                      <p className="text-sm text-red-600">{errors.country.message}</p>
-                    )}
-                  </div>
+                  <FormField
+                    id="country"
+                    label="Country"
+                    placeholder="e.g., USA"
+                    error={errors.country}
+                    register={register("country")}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -271,13 +205,7 @@ export default function AddWarehousePage() {
             </div>
           </form>
         </div>
-      </div>
-
-        {/* Right Panel - Audit Log */}
-        <div className="w-[480px] border-l border-gray-200 overflow-y-auto bg-gray-50">
-          <AuditLog entries={[]} />
-        </div>
-      </div>
+      </SplitLayoutWithAudit>
     </div>
   );
 }

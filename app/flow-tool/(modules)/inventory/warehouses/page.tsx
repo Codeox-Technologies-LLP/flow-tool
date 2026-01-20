@@ -4,7 +4,11 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { debounce, get } from "lodash";
-import { warehouseApi, type WarehouseListResponse, type Tool } from "@/lib/api/warehouse";
+import {
+  warehouseApi,
+  type WarehouseListResponse,
+  type Tool,
+} from "@/lib/api/warehouse";
 import { DataTable } from "@/components/shared/data-table";
 import { ConfirmationDialog } from "@/components/shared/confirmation-dialog";
 import { WarehouseAnalyticsCards } from "@/components/inventory/warehouse/warehouse-analytics-cards";
@@ -12,7 +16,7 @@ import { WarehouseAnalyticsCards } from "@/components/inventory/warehouse/wareho
 export default function WarehousePage() {
   const router = useRouter();
   const [warehouses, setWarehouses] = useState<WarehouseListResponse | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +27,7 @@ export default function WarehousePage() {
   const [sortOrder, setSortOrder] = useState<number>(1);
   const [deleteDialog, setDeleteDialog] = useState(false);
   const [selectedWarehouse, setSelectedWarehouse] = useState<string | null>(
-    null
+    null,
   );
 
   // Fetch warehouses from API
@@ -46,7 +50,8 @@ export default function WarehousePage() {
         setError("Invalid response format");
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to fetch warehouses";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch warehouses";
       setError(errorMessage);
       console.error("Error fetching warehouses:", err);
     } finally {
@@ -86,8 +91,7 @@ export default function WarehousePage() {
       setSelectedWarehouse(id);
       setDeleteDialog(true);
     } else if (action === "edit") {
-      toast.info("Edit functionality coming soon");
-      // Navigate to edit page or open edit dialog
+      router.push(`/flow-tool/inventory/warehouses/${id}`);
     } else if (action === "view") {
       toast.info("View functionality coming soon");
       // Navigate to view page or open view dialog
@@ -95,8 +99,10 @@ export default function WarehousePage() {
   };
 
   const handleToolClick = (toolName: string) => {
-    const tool = get(warehouses, 'tools', []).find((t: Tool) => t.name === toolName);
-    
+    const tool = get(warehouses, "tools", []).find(
+      (t: Tool) => t.name === toolName,
+    );
+
     if (tool?.route) {
       router.push(`/flow-tool${tool.route}`);
     } else if (toolName === "create") {
@@ -126,7 +132,6 @@ export default function WarehousePage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Analytics Summary Cards */}
       {warehouses?.analytics && (
         <WarehouseAnalyticsCards analytics={warehouses.analytics} />
       )}
@@ -134,17 +139,17 @@ export default function WarehousePage() {
       <DataTable
         title="Warehouses"
         description="Manage your warehouse locations and inventory centers"
-        tools={get(warehouses, 'tools', [])}
-        tableHeaders={get(warehouses, 'result.tableHeader', [])}
-        components={get(warehouses, 'result.components', [])}
-        data={get(warehouses, 'result.data', [])}
+        tools={get(warehouses, "tools", [])}
+        tableHeaders={get(warehouses, "result.tableHeader", [])}
+        components={get(warehouses, "result.components", [])}
+        data={get(warehouses, "result.data", [])}
         loading={loading}
         error={error}
-        searchable={get(warehouses, 'result.search', true)}
-        pageable={get(warehouses, 'result.pagination', true)}
-        totalPages={get(warehouses, 'result.totalPages', 1)}
-        currentPage={get(warehouses, 'result.currentPage', 1)}
-        totalRecords={get(warehouses, 'result.totalRecords', 0)}
+        searchable={get(warehouses, "result.search", true)}
+        pageable={get(warehouses, "result.pagination", true)}
+        totalPages={get(warehouses, "result.totalPages", 1)}
+        currentPage={get(warehouses, "result.currentPage", 1)}
+        totalRecords={get(warehouses, "result.totalRecords", 0)}
         onSearch={handleSearch}
         onPageChange={handlePageChange}
         onSort={handleSort}
