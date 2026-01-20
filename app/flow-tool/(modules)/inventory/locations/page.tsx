@@ -16,6 +16,7 @@ export default function LocationsPage() {
     null,
   );
   const [loading, setLoading] = useState(true);
+  const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
@@ -26,11 +27,17 @@ export default function LocationsPage() {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(
     null,
   );
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Fetch locations from API
   const fetchLocations = useCallback(async () => {
     try {
-      setLoading(true);
+      // Only show loading spinner on initial load, not on search/pagination
+      if (isInitialLoad) {
+        setLoading(true);
+      } else {
+        setSearching(true);
+      }
       setError(null);
       const response = await locationApi.list({
         page,
@@ -52,9 +59,14 @@ export default function LocationsPage() {
       setError(errorMessage);
       console.error("Error fetching locations:", err);
     } finally {
-      setLoading(false);
+      if (isInitialLoad) {
+        setLoading(false);
+        setIsInitialLoad(false);
+      } else {
+        setSearching(false);
+      }
     }
-  }, [page, limit, searchQuery, sortBy, sortOrder]);
+  }, [page, limit, searchQuery, sortBy, sortOrder, isInitialLoad]);
 
   // Fetch locations on component mount and when filters change
   useEffect(() => {
@@ -139,6 +151,7 @@ export default function LocationsPage() {
         components={get(locations, "result.components", [])}
         data={get(locations, "result.data", [])}
         loading={loading}
+        searching={searching}
         error={error}
         searchable={get(locations, "result.search", true)}
         pageable={get(locations, "result.pagination", true)}

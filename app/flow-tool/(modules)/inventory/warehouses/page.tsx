@@ -19,6 +19,7 @@ export default function WarehousePage() {
     null,
   );
   const [loading, setLoading] = useState(true);
+  const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
@@ -29,11 +30,17 @@ export default function WarehousePage() {
   const [selectedWarehouse, setSelectedWarehouse] = useState<string | null>(
     null,
   );
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Fetch warehouses from API
   const fetchWarehouses = useCallback(async () => {
     try {
-      setLoading(true);
+      // Only show loading spinner on initial load, not on search/pagination
+      if (isInitialLoad) {
+        setLoading(true);
+      } else {
+        setSearching(true);
+      }
       setError(null);
       const response = await warehouseApi.list({
         page,
@@ -55,9 +62,14 @@ export default function WarehousePage() {
       setError(errorMessage);
       console.error("Error fetching warehouses:", err);
     } finally {
-      setLoading(false);
+      if (isInitialLoad) {
+        setLoading(false);
+        setIsInitialLoad(false);
+      } else {
+        setSearching(false);
+      }
     }
-  }, [page, limit, searchQuery, sortBy, sortOrder]);
+  }, [page, limit, searchQuery, sortBy, sortOrder, isInitialLoad]);
 
   // Fetch warehouses on component mount and when filters change
   useEffect(() => {
@@ -142,6 +154,7 @@ export default function WarehousePage() {
         components={get(warehouses, "result.components", [])}
         data={get(warehouses, "result.data", [])}
         loading={loading}
+        searching={searching}
         error={error}
         searchable={get(warehouses, "result.search", true)}
         pageable={get(warehouses, "result.pagination", true)}

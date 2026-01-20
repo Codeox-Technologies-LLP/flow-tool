@@ -34,6 +34,7 @@ export function DataTable({
   components,
   data,
   loading = false,
+  searching = false,
   error = null,
   searchable = true,
   pageable = true,
@@ -237,7 +238,32 @@ export function DataTable({
   return (
     <div className="space-y-6">
       {/* Header with Tools */}
-      <Card className="shadow-sm">
+      <Card className="shadow-sm relative overflow-hidden">
+        {/* Smooth animated loading bar for search/pagination */}
+        {searching && (
+          <div className="absolute top-0 left-0 right-0 h-1 bg-blue-100 overflow-hidden z-10">
+            <div 
+              className="h-full bg-gradient-to-r from-blue-400 via-blue-600 to-blue-400 animate-shimmer"
+              style={{
+                width: '50%',
+                backgroundSize: '200% 100%',
+                animation: 'shimmer 1.5s ease-in-out infinite'
+              }}
+            />
+          </div>
+        )}
+        <style jsx>{`
+          @keyframes shimmer {
+            0% {
+              transform: translateX(-100%);
+              background-position: -200% 0;
+            }
+            100% {
+              transform: translateX(400%);
+              background-position: 200% 0;
+            }
+          }
+        `}</style>
         <CardHeader className="border-b bg-white">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>

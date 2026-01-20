@@ -36,6 +36,7 @@ export interface DataTableProps {
   components: TableComponent[];
   data: Record<string, unknown>[];
   loading?: boolean;
+  searching?: boolean;
   error?: string | null;
   searchable?: boolean;
   pageable?: boolean;
