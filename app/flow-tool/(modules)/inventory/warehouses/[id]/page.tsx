@@ -29,8 +29,8 @@ export default async function EditWarehousePage({ params }: EditWarehousePagePro
   return (
     <div className="flex flex-col h-full">
       <PageHeader
-        title="Edit Warehouse"
-        description="Update warehouse information and settings"
+        title={detailResponse.data.name}
+        description={detailResponse.data.warehouseId || "Update warehouse information and settings"}
         backUrl="/flow-tool/inventory/warehouses"
       />
 

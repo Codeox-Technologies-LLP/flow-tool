@@ -130,7 +130,12 @@ export function WarehouseForm({
             description: `Warehouse ID: ${response.warehouseId}`,
           });
           reset();
-          router.push("/flow-tool/inventory/warehouses");
+          // Redirect to the detail page of the newly created warehouse
+          if (response.warehouseId) {
+            router.push(`/flow-tool/inventory/warehouses/${response.warehouseId}`);
+          } else {
+            router.push("/flow-tool/inventory/warehouses");
+          }
         } else {
           toast.error("Failed to create warehouse", {
             description: response.message,
