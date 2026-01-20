@@ -25,7 +25,7 @@ export default async function EditWarehousePage({ params }: EditWarehousePagePro
 
   // Extract audit data or use empty array
   const auditData = auditResponse?.status && auditResponse.data ? auditResponse.data : [];
-
+  console.log("detailResponse", detailResponse);
   return (
     <div className="flex flex-col h-full">
       <PageHeader
