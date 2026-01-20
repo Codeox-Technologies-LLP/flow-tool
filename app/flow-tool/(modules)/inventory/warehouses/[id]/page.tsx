@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getWarehouseDetail, getWarehouseAudit } from "@/lib/api/server-warehouse";
+import { getWarehouseDetail, getWarehouseAudit } from "@/api/warehouse/server-warehouse";
 import { PageHeader } from "@/components/shared/page-header";
 import { SplitLayout } from "@/components/shared/split-layout";
 import { WarehouseForm } from "@/components/inventory/warehouse/warehouse-form";
@@ -26,6 +26,7 @@ export default async function EditWarehousePage({ params }: EditWarehousePagePro
   // Extract audit data or use empty array
   const auditData = auditResponse?.status && auditResponse.data ? auditResponse.data : [];
   console.log("detailResponse", detailResponse);
+  console.log("auditResponse", auditResponse);
   return (
     <div className="flex flex-col h-full">
       <PageHeader

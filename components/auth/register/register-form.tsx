@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PasswordInput from "@/components/ui/password-input";
 import FormDivider from "@/components/auth/shared/form-devider";
-import { authApi } from "@/lib/api/auth";
+import { authApi } from "@/api/auth/auth";
 import { cookieStorage } from "@/lib/utils/cookies";
 
 const RegisterForm = () => {

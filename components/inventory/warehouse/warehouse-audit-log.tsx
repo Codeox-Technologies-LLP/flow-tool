@@ -1,7 +1,7 @@
 "use client";
 
 import AuditLog, { type AuditLogEntry } from "@/components/shared/audit-log";
-import type { WarehouseAuditEntry } from "@/lib/api/server-warehouse";
+import type { WarehouseAuditEntry } from "@/types/warehouse";
 
 interface WarehouseAuditLogProps {
   auditData: WarehouseAuditEntry[];

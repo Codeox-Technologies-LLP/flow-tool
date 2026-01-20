@@ -1,6 +1,6 @@
 import { AppHeader } from "@/components/shared/app-header";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { getUserInfo } from "@/lib/api/server-auth";
+import { getUserInfo } from "@/api/auth/server-auth";
 
 export default async function FlowToolLayout({
   children,

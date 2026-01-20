@@ -1,6 +1,6 @@
 import { ModuleSidebar } from "@/components/shared/module-sidebar";
 import { SidebarInset } from "@/components/ui/sidebar";
-import { getUserInfo } from "@/lib/api/server-auth";
+import { getUserInfo } from "@/api/auth/server-auth";
 import { get } from "lodash";
 
 /**

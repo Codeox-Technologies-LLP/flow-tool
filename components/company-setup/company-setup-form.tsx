@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { companyApi } from "@/lib/api/company";
+import { companyApi } from "@/api/company/company";
 import { cookieStorage } from "@/lib/utils/cookies";
 
 const CompanySetupForm = () => {

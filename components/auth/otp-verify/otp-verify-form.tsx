@@ -11,7 +11,7 @@ import { get, fill, some } from "lodash";
 import { otpSchema, type OtpFormData } from "@/lib/validations/otp";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { authApi } from "@/lib/api/auth";
+import { authApi } from "@/api/auth/auth";
 import { cookieStorage } from "@/lib/utils/cookies";
 
 const OtpVerifyForm = () => {

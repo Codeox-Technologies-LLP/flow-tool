@@ -1,23 +1,6 @@
 import { cookies } from "next/headers";
 import type { WarehouseData } from "./warehouse";
-
-export interface WarehouseAuditEntry {
-  _id: string;
-  warehouseId: string;
-  action: "create" | "edit" | "note" | "activity";
-  title: string;
-  desc: string;
-  userName: string;
-  icon: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface WarehouseAuditResponse {
-  status: boolean;
-  message: string;
-  data: WarehouseAuditEntry[];
-}
+import type { WarehouseAuditEntry, WarehouseAuditResponse } from "@/types/warehouse";
 
 async function makeAuthenticatedRequest(url: string) {
   const cookieStore = await cookies();

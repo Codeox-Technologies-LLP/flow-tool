@@ -1,5 +1,5 @@
 import * as LucideIcons from "lucide-react";
-import { getUserInfo } from "@/lib/api/server-auth";
+import { getUserInfo } from "@/api/auth/server-auth";
 import { get } from "lodash";
 import type { LucideIcon } from "lucide-react";
 import AppCard from "@/components/app-drawer/app-card";

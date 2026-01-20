@@ -11,7 +11,7 @@ import {
   warehouseSchema,
   type WarehouseFormData,
 } from "@/lib/validations/warehouse";
-import { warehouseApi, type WarehouseData } from "@/lib/api/warehouse";
+import { warehouseApi, type WarehouseData } from "@/api/warehouse/warehouse";
 import { Button } from "@/components/ui/button";
 import {
   Card,

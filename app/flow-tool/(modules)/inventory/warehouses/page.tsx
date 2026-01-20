@@ -8,7 +8,7 @@ import {
   warehouseApi,
   type WarehouseListResponse,
   type Tool,
-} from "@/lib/api/warehouse";
+} from "@/api/warehouse/warehouse";
 import { DataTable } from "@/components/shared/data-table";
 import { ConfirmationDialog } from "@/components/shared/confirmation-dialog";
 import { WarehouseAnalyticsCards } from "@/components/inventory/warehouse/warehouse-analytics-cards";

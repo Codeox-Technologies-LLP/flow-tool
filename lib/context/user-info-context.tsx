@@ -37,7 +37,7 @@ export function useUserInfo() {
 import { cache } from "react";
 
 export const getCachedUserInfo = cache(async () => {
-  const { getUserInfo } = await import("@/lib/api/server-auth");
+  const { getUserInfo } = await import("@/api/auth/server-auth");
   return getUserInfo();
 });
 

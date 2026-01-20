@@ -1,4 +1,5 @@
-import { apiClient } from "./axios";
+import { apiClient } from "../axios";
+import type { WarehouseAuditResponse } from "@/types/warehouse";
 
 export interface TableHeader {
   name: string;
@@ -10,7 +11,14 @@ export interface TableHeader {
 export interface TableComponent {
   name: string;
   displayName: string;
-  component: "text" | "action" | "badge" | "custom" | "number" | "currency" | "status";
+  component:
+    | "text"
+    | "action"
+    | "badge"
+    | "custom"
+    | "number"
+    | "currency"
+    | "status";
 }
 
 export interface Tool {
@@ -84,7 +92,7 @@ export interface WarehouseListParams {
 export interface WarehouseListResponse {
   analytics?: WarehouseAnalytics;
   tools?: Tool[];
-  filter?: any[];
+  filter?: unknown[];
   result: {
     tableHeader: TableHeader[];
     search: boolean;
@@ -101,35 +109,44 @@ export const warehouseApi = {
   list: async (params: WarehouseListParams): Promise<WarehouseListResponse> => {
     const response = await apiClient.get<WarehouseListResponse>(
       "/warehouse/list",
-      { params }
+      { params },
     );
     return response.data;
   },
 
-  detail: async (id: string): Promise<{ status: boolean; data: WarehouseData }> => {
+  detail: async (
+    id: string,
+  ): Promise<{ status: boolean; data: WarehouseData }> => {
     const response = await apiClient.get(`/warehouse/detail/${id}`);
     return response.data;
   },
 
-  create: async (data: Record<string, unknown>): Promise<{ status: boolean; message: string; warehouseId?: string }> => {
+  create: async (
+    data: Record<string, unknown>,
+  ): Promise<{ status: boolean; message: string; warehouseId?: string }> => {
     const response = await apiClient.post("/warehouse/create", data);
     return response.data;
   },
 
-  edit: async (id: string, data: Record<string, unknown>): Promise<{ status: boolean; message: string; data?: WarehouseData }> => {
+  edit: async (
+    id: string,
+    data: Record<string, unknown>,
+  ): Promise<{ status: boolean; message: string; data?: WarehouseData }> => {
     const response = await apiClient.put(`/warehouse/edit/${id}`, data);
     return response.data;
   },
 
   delete: async (id: string): Promise<{ status: boolean; message: string }> => {
     const response = await apiClient.delete(`/warehouse/delete`, {
-      data: { ids: [id] }
+      data: { ids: [id] },
     });
     return response.data;
   },
 
-  audit: async (id: string): Promise<{ status: boolean; message: string; data: any[] }> => {
-    const response = await apiClient.get(`/warehouse/audit/${id}`);
+  audit: async (id: string): Promise<WarehouseAuditResponse> => {
+    const response = await apiClient.get<WarehouseAuditResponse>(
+      `/warehouse/audit/${id}`,
+    );
     return response.data;
   },
 };

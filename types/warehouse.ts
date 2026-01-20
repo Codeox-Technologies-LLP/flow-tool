@@ -1,3 +1,21 @@
+export interface WarehouseAuditEntry {
+  _id: string;
+  warehouseId: string;
+  action: "create" | "edit" | "note" | "activity";
+  title: string;
+  desc: string;
+  userName: string;
+  icon: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WarehouseAuditResponse {
+  status: boolean;
+  message: string;
+  data: WarehouseAuditEntry[];
+}
+
 export interface WarehouseAnalyticsSummary {
   totalWarehouses: number;
   totalLocations: number;
@@ -15,6 +33,6 @@ export interface WarehouseAnalyticsCardsProps {
 }
 
 export interface WarehouseEditFormProps {
-  warehouse: import("@/lib/api/warehouse").WarehouseData;
+  warehouse: import("@/api/warehouse/warehouse").WarehouseData;
   warehouseId: string;
 }
