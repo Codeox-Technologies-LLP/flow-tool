@@ -5,35 +5,31 @@ import { getProductDetail } from "@/api/product/server-product";
 import { ProductForm } from "@/components/products/product/product-form";
 
 interface EditProductPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function EditProductPage({ params }: EditProductPageProps) {
-  const { id } = params;
+  const { id } = await params;
+  
+  const [detailResponse] = await Promise.all([
+    getProductDetail(id),
+  ]);
 
-  const detailResponse = await getProductDetail(id);
-  if (!detailResponse?.status || !detailResponse.data) {
+  if (!detailResponse || !detailResponse.status || !detailResponse.data) {
     redirect("/flow-tool/products/products");
   }
 
-  const product = detailResponse.data;
-
+  console.log("detailResponse", detailResponse);
   return (
     <div className="flex flex-col h-full">
       <PageHeader
-        title={product.name}
-        description={
-          product.productId || "Update product information and settings"
-        }
+        title={detailResponse.data.name}
+        description={detailResponse.data.productId || "Update product information and settings"}
         backUrl="/flow-tool/products/products"
       />
 
       <SplitLayout>
-        <ProductForm
-          mode="edit"
-          product={product}
-          productId={id}
-        />
+        <ProductForm mode="edit" product={detailResponse.data} productId={id} />
       </SplitLayout>
     </div>
   );
