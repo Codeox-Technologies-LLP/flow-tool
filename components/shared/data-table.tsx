@@ -243,7 +243,7 @@ export function DataTable({
         {searching && (
           <div className="absolute top-0 left-0 right-0 h-1 bg-blue-100 overflow-hidden z-10">
             <div 
-              className="h-full bg-gradient-to-r from-blue-400 via-blue-600 to-blue-400 animate-shimmer"
+              className="h-full bg-linear-to-r from-blue-400 via-blue-600 to-blue-400 animate-shimmer"
               style={{
                 width: '50%',
                 backgroundSize: '200% 100%',

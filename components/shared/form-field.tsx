@@ -3,13 +3,15 @@ import { FieldError, UseFormRegisterReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { SearchableDropdown } from "@/components/shared/searchable-dropdown";
 import { cn } from "@/lib/utils";
+import type { DropdownOption } from "@/types/searchable-dropdown";
 
 interface FormFieldProps {
   id: string;
   label: string;
   placeholder?: string;
-  type?: "text" | "email" | "tel" | "number" | "password" | "url" | "date" | "time" | "datetime-local";
+  type?: "text" | "email" | "tel" | "number" | "password" | "url" | "date" | "time" | "datetime-local" | "dropdown";
   required?: boolean;
   error?: FieldError | string;
   register?: UseFormRegisterReturn;
@@ -20,6 +22,14 @@ interface FormFieldProps {
   disabled?: boolean;
   helpText?: string;
   autoFocus?: boolean;
+  // Searchable dropdown specific props
+  options?: DropdownOption[];
+  value?: string;
+  onValueChange?: (value: string) => void;
+  loading?: boolean;
+  searchPlaceholder?: string;
+  emptyText?: string;
+  allowClear?: boolean;
 }
 
 interface TextareaFieldProps extends Omit<FormFieldProps, "type"> {
@@ -41,7 +51,51 @@ export function FormField({
   disabled = false,
   helpText,
   autoFocus = false,
+  // Searchable dropdown props
+  options = [],
+  value,
+  onValueChange,
+  loading = false,
+  searchPlaceholder = "Search...",
+  emptyText = "No options found.",
+  allowClear = true,
 }: FormFieldProps) {
+  // Render searchable dropdown
+  if (type === "dropdown") {
+    return (
+      <div className={cn("space-y-1.5", fullWidth && "md:col-span-2", className)}>
+        <Label 
+          htmlFor={id} 
+          className={cn("text-sm font-medium text-gray-700", labelClassName)}
+        >
+          {label}
+          {required && <span className="text-red-600 ml-1">*</span>}
+        </Label>
+        <SearchableDropdown
+          options={options}
+          value={value}
+          onValueChange={onValueChange || (() => {})}
+          placeholder={placeholder}
+          searchPlaceholder={searchPlaceholder}
+          emptyText={emptyText}
+          disabled={disabled}
+          loading={loading}
+          allowClear={allowClear}
+          error={!!error}
+          helperText={
+            error 
+              ? typeof error === "string" 
+                ? error 
+                : error.message
+              : helpText
+          }
+          className={inputClassName}
+        />
+      </div>
+    );
+  }
+
+  // Render regular input
   return (
     <div className={cn("space-y-1.5", fullWidth && "md:col-span-2", className)}>
       <Label 

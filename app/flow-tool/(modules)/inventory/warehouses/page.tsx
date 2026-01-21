@@ -150,7 +150,7 @@ export default function WarehousePage() {
         title="Warehouses"
         description="Manage your warehouse locations and inventory centers"
         tools={get(warehouses, "tools", [])}
-        tableHeaders={get(warehouses, "result.tableHeader", [])}
+        tableHeaders={get(warehouses, "result.tableHeader", [])} 
         components={get(warehouses, "result.components", [])}
         data={get(warehouses, "result.data", [])}
         loading={loading}

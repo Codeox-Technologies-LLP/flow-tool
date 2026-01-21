@@ -19,14 +19,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FormField } from "@/components/shared/form-field";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 
 interface LocationFormProps {
   mode: "create" | "edit";
@@ -40,21 +32,21 @@ interface LocationFormProps {
 }
 
 const LOCATION_TYPES = [
-  { value: "internal-location", label: "Internal Location" },
-  { value: "vendor-location", label: "Vendor Location" },
-  { value: "customer-location", label: "Customer Location" },
-  { value: "inventory-loss", label: "Inventory Loss" },
-  { value: "production", label: "Production" },
-  { value: "transit-location", label: "Transit Location" },
-  { value: "view", label: "View" },
+  { _id: "internal-location", name: "Internal Location" },
+  { _id: "vendor-location", name: "Vendor Location" },
+  { _id: "customer-location", name: "Customer Location" },
+  { _id: "inventory-loss", name: "Inventory Loss" },
+  { _id: "production", name: "Production" },
+  { _id: "transit-location", name: "Transit Location" },
+  { _id: "view", name: "View" },
 ];
 
 export function LocationForm({ mode, location, locationId }: LocationFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [warehouses, setWarehouses] = useState<Array<{ id: string; name: string }>>([]);
+  const [warehouses, setWarehouses] = useState<Array<{ _id: string; name: string }>>([]);
   const [loadingWarehouses, setLoadingWarehouses] = useState(true);
-  const [locations, setLocations] = useState<Array<{ id: string; name: string }>>([]);
+  const [locations, setLocations] = useState<Array<{ _id: string; name: string }>>([]);
   const [loadingLocations, setLoadingLocations] = useState(false);
 
   const {
@@ -93,7 +85,7 @@ export function LocationForm({ mode, location, locationId }: LocationFormProps) 
         if (response?.result?.data) {
           setWarehouses(
             response.result.data.map((wh) => ({
-              id: wh.id as string, // Use the MongoDB ObjectId
+              _id: wh.id as string, // Use the MongoDB ObjectId
               name: wh.name,
             }))
           );
@@ -129,7 +121,7 @@ export function LocationForm({ mode, location, locationId }: LocationFormProps) 
           const availableLocations = response.result.data
             .filter((loc) => mode === "create" || loc.locationId !== locationId)
             .map((loc) => ({
-              id: loc.locationId as string,
+              _id: loc.locationId as string,
               name: loc.name,
             }));
           setLocations(availableLocations);
@@ -211,33 +203,6 @@ export function LocationForm({ mode, location, locationId }: LocationFormProps) 
     router.push("/flow-tool/inventory/locations");
   };
 
-  const formFields = [
-    {
-      label: "Warehouse",
-      id: "warehouseId" as const,
-      placeholder: "Select warehouse",
-      type: "select" as const,
-    },
-    {
-      label: "Parent Location",
-      id: "parentId" as const,
-      placeholder: "Select parent location (optional)",
-      type: "select" as const,
-    },
-    {
-      label: "Location Name",
-      id: "name" as const,
-      placeholder: "Enter location name",
-      type: "text" as const,
-    },
-    {
-      label: "Location Type",
-      id: "type" as const,
-      placeholder: "Select location type (optional)",
-      type: "select" as const,
-    },
-  ];
-
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Card>
@@ -251,102 +216,70 @@ export function LocationForm({ mode, location, locationId }: LocationFormProps) 
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
-        {formFields.map((field) => {
-          if (field.type === "select") {
-            if (field.id === "warehouseId") {
-              return (
-                <div key={field.id} className="space-y-2">
-                  <Label htmlFor={field.id}>{field.label}</Label>
-                  <Select
-                    value={selectedWarehouse}
-                    onValueChange={(value) => setValue("warehouseId", value)}
-                    disabled={loadingWarehouses || mode === "edit"}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={field.placeholder} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {warehouses.map((wh) => (
-                        <SelectItem key={wh.id} value={wh.id}>
-                          {wh.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.warehouseId && (
-                    <p className="text-sm text-red-600">{errors.warehouseId.message}</p>
-                  )}
-                </div>
-              );
-            } else if (field.id === "type") {
-              return (
-                <div key={field.id} className="space-y-2">
-                  <Label htmlFor={field.id}>{field.label}</Label>
-                  <Select
-                    value={selectedType}
-                    onValueChange={(value) => setValue("type", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={field.placeholder} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LOCATION_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.type && (
-                    <p className="text-sm text-red-600">{errors.type.message}</p>
-                  )}
-                </div>
-              );
-            } else if (field.id === "parentId") {
-              return (
-                <div key={field.id} className="space-y-2">
-                  <Label htmlFor={field.id}>{field.label}</Label>
-                  <Select
-                    value={selectedParent ?? "none"}
-                    onValueChange={(value) => {
-                      setValue("parentId", value === "none" ? null : value, {
-                        shouldValidate: true,
-                      });
-                    }}
-                    disabled={!selectedWarehouse || loadingLocations}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={field.placeholder} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem key="none" value="none">None (Root Level)</SelectItem>
-                      {locations.map((loc) => (
-                        <SelectItem key={loc.id} value={loc.id}>
-                          {loc.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.parentId && (
-                    <p className="text-sm text-red-600">{errors.parentId.message}</p>
-                  )}
-                </div>
-              );
-            }
-          }
-
-          return (
+            {/* Warehouse Dropdown */}
             <FormField
-              key={field.id}
-              label={field.label}
-              id={field.id}
-              type={field.type}
-              placeholder={field.placeholder}
-              register={register(field.id)}
-              error={errors[field.id]}
+              id="warehouseId"
+              label="Warehouse"
+              type="dropdown"
+              placeholder="Select warehouse"
+              searchPlaceholder="Search warehouses..."
+              emptyText="No warehouses found"
+              required
+              options={warehouses}
+              value={selectedWarehouse}
+              onValueChange={(value) => setValue("warehouseId", value, { shouldValidate: true })}
+              loading={loadingWarehouses}
+              disabled={mode === "edit"}
+              error={errors.warehouseId}
             />
-          );
-        })}
+
+            {/* Parent Location Dropdown */}
+            <FormField
+              id="parentId"
+              label="Parent Location"
+              type="dropdown"
+              placeholder="Select parent location (optional)"
+              searchPlaceholder="Search locations..."
+              emptyText="No locations found"
+              options={[
+                { _id: "none", name: "None (Root Level)" },
+                ...locations,
+              ]}
+              value={selectedParent ?? "none"}
+              onValueChange={(value) => {
+                setValue("parentId", value === "none" ? null : value, {
+                  shouldValidate: true,
+                });
+              }}
+              loading={loadingLocations}
+              disabled={!selectedWarehouse || loadingLocations}
+              error={errors.parentId}
+            />
+
+            {/* Location Name */}
+            <FormField
+              id="name"
+              label="Location Name"
+              type="text"
+              placeholder="Enter location name"
+              required
+              register={register("name")}
+              error={errors.name}
+            />
+
+            {/* Location Type Dropdown */}
+            <FormField
+              id="type"
+              label="Location Type"
+              type="dropdown"
+              placeholder="Select location type (optional)"
+              searchPlaceholder="Search location types..."
+              emptyText="No location types found"
+              options={LOCATION_TYPES}
+              value={selectedType}
+              onValueChange={(value) => setValue("type", value, { shouldValidate: true })}
+              error={errors.type}
+            />
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
