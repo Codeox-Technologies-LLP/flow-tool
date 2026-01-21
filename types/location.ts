@@ -23,6 +23,7 @@ export interface Tool {
 
 export interface LocationData extends Record<string, unknown> {
   id: string;
+  locationId: string;
   name: string;
   warehouseName: string;
   path: string;
@@ -61,6 +62,7 @@ export interface LocationListParams {
   sortBy?: string;
   sortOrder?: number;
   search?: string;
+  warehouseId?: string;
 }
 
 export interface LocationListResponse {
