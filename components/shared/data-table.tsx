@@ -206,6 +206,8 @@ export function DataTable({
         archived: "bg-red-100 text-red-700 border-red-200",
       };
       const statusValue = String(value || "inactive").toLowerCase();
+      console.log(statusValue,"status");
+      
       return (
         <Badge
           variant="outline"
