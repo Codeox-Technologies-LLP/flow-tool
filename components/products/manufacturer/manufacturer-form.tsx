@@ -15,34 +15,29 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FormField } from "@/components/shared/form-field";
-import { CategoryFormData, categorySchema } from "@/lib/validations/category";
-import { categoryApi, CategoryData } from "@/api/category/category";
+import { ManufacturerFormData, manufacturerSchema } from "@/lib/validations/manufacturer";
+import { manufacturerApi, ManufacturerData } from "@/api/manufacturer/manufacturer";
 
-interface CategoryFormProps {
+interface ManufacturerFormProps {
   mode: "create" | "edit";
-  category?: CategoryData;
-  categoryId?: string;
+  manufacturer?: ManufacturerData;
+  manufacturerId?: string;
 }
 
 const formFields = [
   {
-    label: "Category Name",
+    label: "Manufacturer Name",
     id: "name" as const,
     required: true,
-    placeholder: "Enter Category name",
-  },
-  {
-    label: "Short Code",
-    id: "code" as const,
-    placeholder:"Enter code",
+    placeholder: "Enter Manufacturer name",
   }
 ];
 
-export function CategoryForm({
+export function ManufacturerForm({
   mode,
-  category,
-  categoryId,
-}: CategoryFormProps) {
+  manufacturer,
+  manufacturerId,
+}: ManufacturerFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -51,21 +46,19 @@ export function CategoryForm({
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<CategoryFormData>({
-    resolver: zodResolver(categorySchema),
+  } = useForm<ManufacturerFormData>({
+    resolver: zodResolver(manufacturerSchema),
     defaultValues:
-      mode === "edit" && category
+      mode === "edit" && manufacturer
         ? {
-            name: category.name || "",
-            code: category.code || "",
+            name: manufacturer.name || ""
           }
         : {
-            name: "",
-            code: ""
+            name: ""
           },
   });
 
-  const onSubmit = async (data: CategoryFormData) => {
+  const onSubmit = async (data: ManufacturerFormData) => {
     try {
       setLoading(true);
 
@@ -75,40 +68,38 @@ export function CategoryForm({
           Object.entries(data).filter(([, value]) => value?.trim())
         );
 
-        const response = await categoryApi.create(cleanedData);
+        const response = await manufacturerApi.create(cleanedData);
 
         if (response.status) {
-          toast.success("category created successfully!", {
-            description: `category ID: ${response.categoryId}`,
+          toast.success("brand created successfully!", {
+            description: `manufacturer ID: ${response.manufacturerId}`,
           });
           reset();
-          // Redirect to the detail page of the newly created category
-          if (response.categoryId) {
-            router.push(`/flow-tool/products/categories/${response.categoryId}`);
+          // Redirect to the detail page of the newly created manufacturer
+          if (response.manufacturerId) {
+            router.push(`/flow-tool/products/manufacturer/${response.manufacturerId}`);
           } else {
-            router.push("/flow-tool/products/categories");
+            router.push("/flow-tool/products/manufacturer");
           }
         } else {
-          toast.error("Failed to create category", {
+          toast.error("Failed to create manufacturer", {
             description: response.message,
           });
         }
-      } else if (mode === "edit" && categoryId) {
+      } else if (mode === "edit" && manufacturerId) {
         const cleanedData: Record<string, unknown> = {
-          id: categoryId,
+          id: manufacturerId,
           name: data.name,
         };
 
-        if (data.code?.trim()) cleanedData.code = data.code;
-
-        const response = await categoryApi.edit(categoryId, cleanedData);
+        const response = await manufacturerApi.edit(manufacturerId, cleanedData);
 
         if (response.status) {
-          toast.success("category updated successfully");
+          toast.success("manufacturer updated successfully");
           // Refresh the page to update audit log without redirecting
           router.refresh();
         } else {
-          toast.error(response.message || "Failed to update category");
+          toast.error(response.message || "Failed to update manufacturer");
         }
       }
     } catch (error) {
@@ -116,14 +107,14 @@ export function CategoryForm({
         error instanceof Error ? error.message : "An error occurred";
       toast.error(
         mode === "create"
-          ? "Failed to create category"
-          : "Failed to update category",
+          ? "Failed to create manufacturer"
+          : "Failed to update manufacturer",
         {
           description: errorMessage,
         }
       );
       console.error(
-        `Error ${mode === "create" ? "creating" : "updating"} category:`,
+        `Error ${mode === "create" ? "creating" : "updating"} manufacturer:`,
         error
       );
     } finally {
@@ -132,18 +123,18 @@ export function CategoryForm({
   };
 
   const handleCancel = () => {
-    router.push("/flow-tool/products/categories");
+    router.push("/flow-tool/products/manufacturer");
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Card>
         <CardHeader>
-          <CardTitle>Category Information</CardTitle>
+          <CardTitle>Manufacturer Information</CardTitle>
           <CardDescription>
             {mode === "create"
-              ? "Enter category details and location"
-              : "Update the category details below"}
+              ? "Enter manufacturer details and location"
+              : "Update the manufacturer details below"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -179,7 +170,7 @@ export function CategoryForm({
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
-                  {mode === "create" ? "Create category" : "Update category"}
+                  {mode === "create" ? "Create manufacturer" : "Update manufacturer"}
                 </>
               )}
             </Button>

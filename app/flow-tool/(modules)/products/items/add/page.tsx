@@ -9,7 +9,7 @@ export default function AddProductPage() {
             <PageHeader
                 title="Add New Product"
                 description="Quick setup - add details later in product settings"
-                backUrl="/flow-tool/products/products"
+                backUrl="/flow-tool/products/items"
             />
             <ProductForm mode="create" />
         </div>

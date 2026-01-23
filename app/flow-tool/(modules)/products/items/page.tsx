@@ -94,7 +94,7 @@ export default function ProductPage() {
             setSelectedProduct(id);
             setDeleteDialog(true);
         } else if (action === "edit") {
-            router.push(`/flow-tool/products/products/${id}`);
+            router.push(`/flow-tool/products/items/${id}`);
         } else if (action === "view") {
             toast.info("View functionality coming soon");
         }

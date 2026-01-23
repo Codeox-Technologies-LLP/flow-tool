@@ -1,22 +1,22 @@
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/shared/page-header";
 import { SplitLayout } from "@/components/shared/split-layout";
-import { getProductDetail } from "@/api/product/server-product";
-import { ProductForm } from "@/components/products/product/product-form";
+import { BrandForm } from "@/components/products/brand/brand-form";
+import { getBrandDetail } from "@/api/brand/server-brand";
 
-interface EditProductPageProps {
+interface EditBrandPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function EditProductPage({ params }: EditProductPageProps) {
+export default async function EditBrandPage({ params }: EditBrandPageProps) {
   const { id } = await params;
   
   const [detailResponse] = await Promise.all([
-    getProductDetail(id),
+    getBrandDetail(id),
   ]);
 
   if (!detailResponse || !detailResponse.status || !detailResponse.data) {
-    redirect("/flow-tool/products/items");
+    redirect("/flow-tool/products/brand");
   }
 
   console.log("detailResponse", detailResponse);
@@ -24,12 +24,12 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     <div className="flex flex-col h-full">
       <PageHeader
         title={detailResponse.data.name}
-        description={detailResponse.data.productId || "Update product information and settings"}
-        backUrl="/flow-tool/products/items"
+        description={detailResponse.data.name || "Update product information and settings"}
+        backUrl="/flow-tool/products/brand"
       />
 
       <SplitLayout>
-        <ProductForm mode="edit" product={detailResponse.data} productId={id} />
+        <BrandForm mode="edit" brand={detailResponse.data} brandId={id} />
       </SplitLayout>
     </div>
   );

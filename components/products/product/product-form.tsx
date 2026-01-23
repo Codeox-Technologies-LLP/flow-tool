@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -17,6 +17,8 @@ import {
 import { FormField } from "@/components/shared/form-field";
 import { productApi, ProductData } from "@/api/product/product";
 import { ProductFormData, productSchema } from "@/lib/validations/product";
+import { brandApi } from "@/api/brand/brand";
+import { manufacturerApi } from "@/api/manufacturer/manufacturer";
 
 interface ProductFormProps {
     mode: "create" | "edit";
@@ -24,57 +26,30 @@ interface ProductFormProps {
     productId?: string;
 }
 
-const formFields = [
-    {
-        label: "Product Type",
-        id: "type" as const,
-        required: true,
-        placeholder: "Select product type (goods/service)",
-    },
-    {
-        label: "Product Scope",
-        id: "productScope" as const,
-        required: true,
-        placeholder: "Select product scope (company/organisation)",
-    },
-    {
-        label: "Name",
-        id: "name" as const,
-        required: true,
-        placeholder: "Enter product name",
-    },
-    {
-        label: "Product Code",
-        id: "productCode" as const,
-        placeholder: "Enter product code/SKU",
-    },
-    {
-        label: "Manufacturer",
-        id: "manufacture" as const,
-        placeholder: "Enter manufacturer",
-    },
-    {
-        label: "Brand",
-        id: "brand" as const,
-        placeholder: "Enter brand",
-    },
-    {
-        label: "Cost Price",
-        id: "price" as const,
-        required: true,
-        placeholder: "Enter cost price",
-    },
-    {
-        label: "Unit",
-        id: "uom" as const,
-        required: true,
-        placeholder: "Select unit (e.g., kg, dozen)",
-    },
-    {
-        label: "Description",
-        id: "description" as const,
-        placeholder: "Enter product description",
-    },
+const PRODUCT_TYPES = [
+  { _id: "goods", name: "Goods" },
+  { _id: "service", name: "Service" },
+];
+
+const PRODUCT_SCOPE = [
+  { _id: "company", name: "Company" },
+  { _id: "organisation", name: "Organisation" },
+];
+
+const UOM_OPTIONS = [
+  { _id: "kg", name: "Kilogram (kg)" },
+  { _id: "g", name: "Gram (g)" },
+  { _id: "cm", name: "Centimeter (cm)" },
+  { _id: "m", name: "Meter (m)" },
+  { _id: "l", name: "Liter (l)" },
+  { _id: "ml", name: "Milliliter (ml)" },
+  { _id: "pcs", name: "Piece (pcs)" },
+  { _id: "box", name: "Box" },
+  { _id: "packet", name: "Packet" },
+  { _id: "dozen", name: "Dozen" },
+  { _id: "set", name: "Set" },
+  { _id: "pair", name: "Pair" },
+  { _id: "unit", name: "Unit" },
 ];
 
 export function ProductForm({
@@ -84,11 +59,52 @@ export function ProductForm({
 }: ProductFormProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [brands, setBrands] = useState<Array<{ _id: string; name: string }>>([]);
+    const [manufacturers, setManufacturers] = useState<Array<{ _id: string; name: string }>>([]);
+    const [loadingBrands, setLoadingBrands] = useState(false);
+    const [loadingManufacturers, setLoadingManufacturers] = useState(false);
 
+
+    useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        setLoadingBrands(true);
+        const res = await brandApi.dropdown();
+          setBrands(
+            res.map((b: any) => ({
+              _id: b._id,
+              name: b.name,
+            }))
+          );
+      } finally {
+        setLoadingBrands(false);
+      }
+    };
+
+    const fetchManufacturers = async () => {
+      try {
+        setLoadingManufacturers(true);
+        const res = await manufacturerApi.dropdown();
+          setManufacturers(
+            res.map((m: any) => ({
+              _id: m._id,
+              name: m.name,
+            }))
+          );
+      } finally {
+        setLoadingManufacturers(false);
+      }
+    };
+
+    fetchBrands();
+    fetchManufacturers();
+  }, []);
     const {
         register,
         handleSubmit,
         formState: { errors },
+        setValue,
+        watch,
         reset,
     } = useForm<ProductFormData>({
         resolver: zodResolver(productSchema),
@@ -118,6 +134,32 @@ export function ProductForm({
                 },
     });
 
+    const selectedType = watch("type");
+    const selectedScope = watch("productScope");
+    const selectedUom = watch("uom");
+    const productName = watch("name");
+    const productType = watch("type");
+
+    useEffect(() => {
+    if (mode !== "create") return;
+
+    if (productName?.trim()) {
+        const prefix = productType === "goods" ? "PRD" : "SRV";
+        const namePart = productName
+        .replace(/[^a-zA-Z0-9]/g, "")
+        .substring(0, 3)
+        .toUpperCase();
+
+        const uniquePart = Date.now().toString().slice(-6);
+
+        setValue(
+        "productCode",
+        `${prefix}-${namePart}-${uniquePart}`,
+        { shouldValidate: true }
+        );
+    }
+    }, [productName, productType, mode, setValue]);
+
     const onSubmit = async (data: ProductFormData) => {
         try {
             setLoading(true);
@@ -135,9 +177,9 @@ export function ProductForm({
                     });
                     reset();
                     if (response.productId) {
-                        router.push(`/flow-tool/products/products/${response.productId}`);
+                        router.push(`/flow-tool/products/items/${response.productId}`);
                     } else {
-                        router.push("/flow-tool/products/products");
+                        router.push("/flow-tool/products/items");
                     }
                 } else {
                     toast.error("Failed to create product", {
@@ -189,7 +231,7 @@ export function ProductForm({
     };
 
     const handleCancel = () => {
-        router.push("/flow-tool/products/products");
+        router.push("/flow-tool/products/items");
     };
 
     return (
@@ -205,17 +247,126 @@ export function ProductForm({
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
-                        {formFields.map((field) => (
-                            <FormField
-                                key={field.id}
-                                label={field.label}
-                                id={field.id}
-                                required={field.required}
-                                error={errors[field.id]?.message}
-                                register={register(field.id)}
-                                placeholder={field.placeholder}
-                            />
-                        ))}
+                        {/* Product Type Dropdown */}
+                        <FormField
+                            id="type"
+                            label="Product Type"
+                            type="dropdown"
+                            placeholder="Select product type (goods/service)"
+                            searchPlaceholder="Search product types..."
+                            emptyText="No product types found"
+                            required
+                            options={PRODUCT_TYPES}
+                            value={selectedType}
+                            onValueChange={(value) => setValue("type", value as "goods" | "service", { shouldValidate: true })}
+                            error={errors.type}
+                        />
+
+                        {/* Product Scope Dropdown */}
+                        <FormField
+                            id="productScope"
+                            label="Product Scope"
+                            type="dropdown"
+                            placeholder="Select product scope (company/organisation)"
+                            searchPlaceholder="Search product scopes..."
+                            emptyText="No product scopes found"
+                            required
+                            options={PRODUCT_SCOPE}
+                            value={selectedScope}
+                            onValueChange={(value) => setValue("productScope", value as "company" | "organisation", { shouldValidate: true })}
+                            error={errors.productScope}
+                        />
+
+                        {/* Name */}
+                        <FormField
+                            id="name"
+                            label="Name"
+                            type="text"
+                            placeholder="Enter product name"
+                            required
+                            register={register("name")}
+                            error={errors.name}
+                        />
+
+                        {/* Product Code */}
+                        <FormField
+                            id="productCode"
+                            label="Product Code"
+                            type="text"
+                            placeholder="Enter product code/SKU"
+                            register={register("productCode")}
+                            error={errors.productCode}
+                        />
+
+                        {/* Manufacturer */}
+                        <FormField
+                            id="manufacture"
+                            label="Manufacturer"
+                            type="dropdown"
+                            placeholder="Select manufacturer"
+                            searchPlaceholder="Search manufacturers..."
+                            emptyText="No manufacturers found"
+                            options={manufacturers}
+                            value={watch("manufacture")}
+                            onValueChange={(value) =>
+                                setValue("manufacture", value, { shouldValidate: true })
+                            }
+                            loading={loadingManufacturers}
+                            error={errors.manufacture}
+                        />
+
+                        {/* Brand */}
+                        <FormField
+                            id="brand"
+                            label="Brand"
+                            type="dropdown"
+                            placeholder="Select brand"
+                            searchPlaceholder="Search brands..."
+                            emptyText="No brands found"
+                            options={brands}
+                            value={watch("brand")}
+                            onValueChange={(value) =>
+                                setValue("brand", value, { shouldValidate: true })
+                            }
+                            loading={loadingBrands}
+                            error={errors.brand}
+                        />
+
+                        {/* Cost Price */}
+                        <FormField
+                            id="price"
+                            label="Cost Price"
+                            type="number"
+                            placeholder="Enter cost price"
+                            required
+                            register={register("price", { valueAsNumber: true })}
+                            error={errors.price}
+                        />
+
+                        {/* Unit Dropdown */}
+                        <FormField
+                            id="uom"
+                            label="Unit"
+                            type="dropdown"
+                            placeholder="Select unit (e.g., kg, dozen)"
+                            searchPlaceholder="Search units..."
+                            emptyText="No units found"
+                            required
+                            options={UOM_OPTIONS}
+                            value={selectedUom}
+                            onValueChange={(value) => setValue("uom", value, { shouldValidate: true })}
+                            error={errors.uom}
+                        />
+
+                        {/* Description */}
+                        <FormField
+                            id="description"
+                            label="Description"
+                            type="text"
+                            placeholder="Enter product description"
+                            register={register("description")}
+                            error={errors.description}
+                        />
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4">
