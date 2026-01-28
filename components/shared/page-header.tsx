@@ -19,7 +19,7 @@ export function PageHeader({
   showBackButton = true,
 }: PageHeaderProps) {
   return (
-    <div className="bg-white border-b border-gray-200">
+    <div className="bg-white border-b border-gray-200 rounded-xl">
       <div className="px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">

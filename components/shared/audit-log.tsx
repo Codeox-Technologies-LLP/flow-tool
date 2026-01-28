@@ -376,9 +376,9 @@ export default function AuditLog({
   });
 
   return (
-    <div className={cn("h-full flex flex-col bg-white", className)}>
+    <div className={cn("h-full flex flex-col bg-white ", className)}>
       {/* Header */}
-      <div className="px-5 py-4 border-b border-gray-200 shrink-0 sticky top-0 bg-white z-10">
+      <div className="px-5 py-4 border-b border-gray-200 rounded-xl shrink-0 sticky top-0 bg-white z-10">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
             {title}
