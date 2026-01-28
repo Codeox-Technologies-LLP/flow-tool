@@ -67,7 +67,7 @@ export function LeadAnalyticsCards({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-gray-900">
-            {get(analytics, "statusDistribution.active", 0)}
+            {get(analytics, "summary.active", 0)}
           </div>
           <p className="text-xs text-gray-500 mt-1">
             Currently engaged
@@ -79,16 +79,16 @@ export function LeadAnalyticsCards({
       <Card className="shadow-sm hover:shadow-md transition-shadow">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-600">
-            Inactive Leads
+            Won Leads
           </CardTitle>
           <UserX className="h-4 w-4 text-gray-500" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-gray-900">
-            {get(analytics, "statusDistribution.inactive", 0)}
+            {get(analytics, "summary.won", 0)}
           </div>
           <p className="text-xs text-gray-500 mt-1">
-            Not responding
+            Successfully converted into deals
           </p>
         </CardContent>
       </Card>
@@ -97,7 +97,7 @@ export function LeadAnalyticsCards({
       <Card className="shadow-sm hover:shadow-md transition-shadow">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-600">
-            Needs Attention
+            Loss Leads
           </CardTitle>
           <AlertTriangle className="h-4 w-4 text-orange-600" />
         </CardHeader>
@@ -106,8 +106,7 @@ export function LeadAnalyticsCards({
             {get(analytics, "alerts.needsAttention", 0)}
           </div>
           <p className="text-xs text-orange-600 mt-1">
-            {get(analytics, "alerts.lowStock", 0)} pending follow-ups,{" "}
-            {get(analytics, "alerts.outOfStock", 0)} overdue
+          {get(analytics, "summary.loss", 0)} leads marked as lost
           </p>
         </CardContent>
       </Card>

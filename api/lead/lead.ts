@@ -19,9 +19,7 @@ export interface TableComponent {
     | "custom"
     | "number"
     | "currency"
-    | "status"
-    | "date"
-    | "dropdown";
+    | "status";
 }
 
 export interface Tool {
@@ -127,7 +125,7 @@ export const leadApi = {
   },
 
   delete: async (id: string): Promise<{ status: boolean; message: string }> => {
-    const response = await apiClient.delete("/enquiry/delete", { data: { ids: [id] } });
+    const response = await apiClient.delete(`/enquiry/delete/${id}`);
     return response.data;
   },
 

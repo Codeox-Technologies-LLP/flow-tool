@@ -6,12 +6,12 @@ import { toast } from "sonner";
 import { debounce, get } from "lodash";
 import { DataTable } from "@/components/shared/data-table";
 import { ConfirmationDialog } from "@/components/shared/confirmation-dialog";
-import { leadApi, LeadListResponse, Tool } from "@/api/lead/lead";
-import { LeadAnalyticsCards } from "@/components/crm/lead/lead-analytics-card";
+import { ClientListResponse, Tool } from "@/types/client";
+import { clientApi } from "@/api/client/client";
 
-export default function LeadPage() {
+export default function ClientsPage() {
   const router = useRouter();
-  const [leads, setLeads] = useState<LeadListResponse | null>(
+  const [clients, setClients] = useState<ClientListResponse | null>(
     null,
   );
   const [loading, setLoading] = useState(true);
@@ -23,20 +23,22 @@ export default function LeadPage() {
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState<number>(1);
   const [deleteDialog, setDeleteDialog] = useState(false);
-  const [selectedLead, setSelectedLead] = useState<string | null>(
+  const [selectedClient, setSelectedClient] = useState<string | null>(
     null,
   );
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  const fetchLeads = useCallback(async () => {
+  // Fetch Clients from API
+  const fetchClients = useCallback(async () => {
     try {
+      // Only show loading spinner on initial load, not on search/pagination
       if (isInitialLoad) {
         setLoading(true);
       } else {
         setSearching(true);
       }
       setError(null);
-      const response = await leadApi.list({
+      const response = await clientApi.list({
         page,
         limit,
         search: searchQuery || undefined,
@@ -44,16 +46,17 @@ export default function LeadPage() {
         sortOrder,
       });
 
+      // API returns data directly without a status wrapper
       if (response && response.result) {
-        setLeads(response);
+        setClients(response);
       } else {
         setError("Invalid response format");
       }
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Failed to fetch Leads";
+        err instanceof Error ? err.message : "Failed to fetch Clients";
       setError(errorMessage);
-      console.error("Error fetching Leads:", err);
+      console.error("Error fetching Clients:", err);
     } finally {
       if (isInitialLoad) {
         setLoading(false);
@@ -64,9 +67,10 @@ export default function LeadPage() {
     }
   }, [page, limit, searchQuery, sortBy, sortOrder, isInitialLoad]);
 
+  // Fetch Clients on component mount and when filters change
   useEffect(() => {
     const debouncedFetch = debounce(() => {
-      fetchLeads();
+      fetchClients();
     }, 300);
 
     debouncedFetch();
@@ -74,11 +78,11 @@ export default function LeadPage() {
     return () => {
       debouncedFetch.cancel();
     };
-  }, [page, searchQuery, sortBy, sortOrder, fetchLeads]);
+  }, [page, searchQuery, sortBy, sortOrder, fetchClients]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setPage(1);
+    setPage(1); // Reset to first page on new search
   };
 
   const handlePageChange = (newPage: number) => {
@@ -92,66 +96,66 @@ export default function LeadPage() {
 
   const handleAction = (action: string, id: string) => {
     if (action === "delete") {
-      setSelectedLead(id);
+      setSelectedClient(id);
       setDeleteDialog(true);
     } else if (action === "edit") {
-      router.push(`/flow-tool/crm/leads/${id}`);
+      router.push(`/flow-tool/crm/clients/${id}`);
     } else if (action === "view") {
       toast.info("View functionality coming soon");
+      // Navigate to view page or open view dialog
     }
   };
 
   const handleToolClick = (toolName: string) => {
-    const tool = get(leads, "tools", []).find(
+    const tool = get(clients, "tools", []).find(
       (t: Tool) => t.name === toolName,
     );
 
     if (tool?.route) {
       router.push(`/flow-tool${tool.route}`);
     } else if (toolName === "create") {
-      router.push("/flow-tool/crm/leads/add");
+      router.push("/flow-tool/crm/clients/add");
     }
   };
 
   const confirmDelete = async () => {
-    if (!selectedLead) return;
+    if (!selectedClient) return;
 
     try {
-      const response = await leadApi.delete(selectedLead);
+      const response = await clientApi.delete(selectedClient);
       if (response.status) {
-        toast.success("Lead deleted successfully");
-        fetchLeads();
+        toast.success("Client deleted successfully");
+        fetchClients(); // Refresh the list
       } else {
-        toast.error(response.message || "Failed to delete Lead");
+        toast.error(response.message || "Failed to delete Client");
       }
     } catch (err) {
-      toast.error("Failed to delete Lead");
-      console.error("Error deleting Lead:", err);
+      toast.error("Failed to delete Client");
+      console.error("Error deleting Client:", err);
     } finally {
       setDeleteDialog(false);
-      setSelectedLead(null);
+      setSelectedClient(null);
     }
   };
 
   return (
     <div className="space-y-6 p-6">
-      <LeadAnalyticsCards analytics={leads?.analytics} loading={loading} />
 
       <DataTable
-        title="Leads"
-        description="Manage your Leads"
-        tools={get(leads, "tools", [])}
-        tableHeaders={get(leads, "result.tableHeader", [])}
-        components={get(leads, "result.components", [])}
-        data={get(leads, "result.data", [])}
+        title="Clients"
+        description="Manage your warehouse Clients and storage areas"
+        tools={get(clients, "tools", [])}
+        tableHeaders={get(clients, "result.tableHeader", [])}
+        components={get(clients, "result.components", [])}
+        data={get(clients, "result.data", [])}
         loading={loading}
         searching={searching}
         error={error}
-        searchable={get(leads, "result.search", true)}
-        pageable={get(leads, "result.pagination", true)}
-        totalPages={get(leads, "result.totalPages", 1)}
-        currentPage={get(leads, "result.currentPage", 1)}
-        totalRecords={get(leads, "result.totalRecords", 0)}
+        searchable={get(clients, "result.search", true)}
+        pageable={get(clients, "result.pagination", true)}
+        totalPages={get(clients, "result.totalPages", 1)}
+        currentPage={get(clients, "result.currentPage", 1)}
+        totalRecords={get(clients, "result.totalRecords", 0)}
         onSearch={handleSearch}
         onPageChange={handlePageChange}
         onSort={handleSort}
@@ -159,12 +163,13 @@ export default function LeadPage() {
         onToolClick={handleToolClick}
       />
 
+      {/* Delete Confirmation Dialog */}
       <ConfirmationDialog
         open={deleteDialog}
         onOpenChange={setDeleteDialog}
         onConfirm={confirmDelete}
-        title="Delete Lead?"
-        description="This action cannot be undone. This will permanently delete the Lead and remove all associated data from our servers."
+        title="Delete Client?"
+        description="This action cannot be undone. This will permanently delete the Client and remove all associated data from our servers."
         confirmText="Delete"
         cancelText="Cancel"
         variant="destructive"
