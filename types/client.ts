@@ -49,7 +49,6 @@ export interface ClientData extends Record<string, unknown> {
     email?: string;
     source?: string;
     type?: string;
-    owner?: string;
     billingAddress?: Address;
     deliveryAddresses?: Address[];
     contacts?: Contact[];

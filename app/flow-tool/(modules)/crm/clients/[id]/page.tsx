@@ -25,7 +25,6 @@ export default async function EditClientPage({ params }: EditClientPageProps) {
     email: clientData.email,
     type: clientData.type,
     source: clientData.source,
-    owner: clientData.owner,
     billingAddress: clientData.billingAddress,
     deliveryAddresses: clientData.deliveryAddresses,
     contacts: clientData.contacts,

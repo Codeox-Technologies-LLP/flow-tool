@@ -26,9 +26,7 @@ export const clientApi = {
   },
 
   delete: async (id: string): Promise<{ status: boolean; message: string }> => {
-    const response = await apiClient.delete(`/clients/delete`, {
-      data: { ids: [id] }
-    });
+    const response = await apiClient.delete(`/clients/delete/${id}`);
     return response.data;
   },
 };

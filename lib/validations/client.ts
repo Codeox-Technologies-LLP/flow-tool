@@ -19,7 +19,6 @@ export const clientSchema = z.object({
   email: z.string().email().optional().or(z.literal("")),
   source: z.string().optional(),
   type: z.string().optional(),
-  owner: z.string().optional(),
   billingAddress: addressSchema.optional(),
   deliveryAddresses: z.array(addressSchema).default([]),
   contacts: z.array(contactSchema).default([]),

@@ -9,7 +9,6 @@ import { Save, Loader2, Plus, Trash2 } from "lucide-react";
 
 import { clientSchema, type ClientFormData } from "@/lib/validations/client";
 import { clientApi } from "@/api/client/client";
-import { userApi } from "@/api/user/user";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -65,7 +64,6 @@ export function ClientForm({ mode, client, clientId, currentUserId }: ClientForm
         email: clientData.email || "",
         source: clientData.source || "",
         type: clientData.type || "",
-        owner: clientData.owner || currentUserId || "",
         billingAddress: clientData.billingAddress || {
           street: "",
           city: "",
@@ -84,7 +82,6 @@ export function ClientForm({ mode, client, clientId, currentUserId }: ClientForm
       email: "",
       source: "",
       type: "",
-      owner: currentUserId || "",
       billingAddress: {
         street: "",
         city: "",
@@ -128,31 +125,7 @@ export function ClientForm({ mode, client, clientId, currentUserId }: ClientForm
     name: "deliveryAddresses",
   });
 
-  // Fetch users for owner dropdown
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setLoadingUsers(true);
-        const response = await userApi.list({ page: 1, limit: 100 });
-        if (response?.result?.data) {
-          setUsers(
-            response.result.data.map((user) => ({
-              _id: user.id as string,
-              name: user.name,
-            }))
-          );
-        }
-      } catch (error) {
-        console.error("Failed to fetch users:", error);
-        toast.error("Failed to load users");
-      } finally {
-        setLoadingUsers(false);
-      }
-    };
-
-    fetchUsers();
-  }, []);
-
+  
   const onSubmit = async (data: ClientFormDataExtended) => {
     try {
       setLoading(true);
@@ -165,7 +138,6 @@ export function ClientForm({ mode, client, clientId, currentUserId }: ClientForm
       if (data.email?.trim()) cleanedData.email = data.email.trim();
       if (data.source?.trim()) cleanedData.source = data.source;
       if (data.type?.trim()) cleanedData.type = data.type;
-      if (data.owner?.trim()) cleanedData.owner = data.owner;
 
       // Handle billing address
       if (data.billingAddress) {
@@ -353,22 +325,6 @@ export function ClientForm({ mode, client, clientId, currentUserId }: ClientForm
                 error={errors.source}
               />
 
-              {/* Owner */}
-              <FormField
-                id="owner"
-                label="Owner"
-                type="dropdown"
-                placeholder="Select owner"
-                searchPlaceholder="Search users..."
-                emptyText="No users found"
-                options={users}
-                value={watch("owner")}
-                onValueChange={(value) =>
-                  setValue("owner", value, { shouldValidate: true })
-                }
-                loading={loadingUsers}
-                error={errors.owner}
-              />
             </div>
           </div>
 
