@@ -30,9 +30,8 @@ export interface Tool {
   route?: string;
 }
 
-export interface ReceiptData extends Record<string, unknown> {
+export interface VendorData extends Record<string, unknown> {
   id: string;
-  receiptId: string;
   vendorId: string;
   warehouseId: string;
   locationId: string;
@@ -49,7 +48,7 @@ export interface ReceiptData extends Record<string, unknown> {
 }
 
 
-export interface ReceiptListParams {
+export interface VendorListParams {
   page?: number;
   limit?: number;
   search?: string;
@@ -57,7 +56,7 @@ export interface ReceiptListParams {
   sortOrder?: number;
 }
 
-export interface ReceiptListResponse {
+export interface VendorListResponse {
   tools?: Tool[];
   filter?: unknown[];
   result: {
@@ -65,17 +64,31 @@ export interface ReceiptListResponse {
     search: boolean;
     pagination: boolean;
     components: TableComponent[];
-    data: ReceiptData[];
+    data: VendorData[];
     totalPages: number;
     currentPage: number;
     totalRecords: number;
   };
 }
 
-export const receiptApi = {
-  list: async (params: ReceiptListParams): Promise<ReceiptListResponse> => {
-    const response = await apiClient.get<ReceiptListResponse>(
-      "/receipt/list",
+export interface VendorDropdownItem {
+  _id: string;
+  name: string;
+  address: {
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+    country: string;
+    city: string;
+    state: string;
+  };
+}
+
+export const vendorApi = {
+  list: async (params: VendorListParams): Promise<VendorListResponse> => {
+    const response = await apiClient.get<VendorListResponse>(
+      "/vendor/list",
       { params },
     );
     return response.data;
@@ -83,28 +96,33 @@ export const receiptApi = {
 
   detail: async (
     id: string,
-  ): Promise<{ status: boolean; data: ReceiptData }> => {
-    const response = await apiClient.get(`/receipt/detail/${id}`);
+  ): Promise<{ status: boolean; data: VendorData }> => {
+    const response = await apiClient.get(`/vendor/detail/${id}`);
     return response.data;
   },
 
   create: async (
     data: Record<string, unknown>,
-  ): Promise<{ status: boolean; message: string; receiptId?: string }> => {
-    const response = await apiClient.post("/receipt/create", data);
+  ): Promise<{ status: boolean; message: string; vendorId?: string }> => {
+    const response = await apiClient.post("/vendor/create", data);
     return response.data;
   },
 
   edit: async (
     id: string,
     data: Record<string, unknown>,
-  ): Promise<{ status: boolean; message: string; data?: ReceiptData }> => {
-    const response = await apiClient.patch(`/receipt/edit/${id}`, data);
+  ): Promise<{ status: boolean; message: string; data?: VendorData }> => {
+    const response = await apiClient.put(`/vendor/edit/${id}`, data);
     return response.data;
   },
 
   delete: async (id: string): Promise<{ status: boolean; message: string }> => {
-    const response = await apiClient.delete(`/receipt/delete/${id}`);
+    const response = await apiClient.delete(`/vendor/delete/${id}`);
+    return response.data;
+  },
+
+  dropdown: async (): Promise<VendorDropdownItem[]> => {
+    const response = await apiClient.get("/vendor/dropdown");
     return response.data;
   },
 };

@@ -11,7 +11,7 @@ import {
 } from "@/api/purchase/purchase";
 import { DataTable } from "@/components/shared/data-table";
 import { ConfirmationDialog } from "@/components/shared/confirmation-dialog";
-// import { WarehouseAnalyticsCards } from "@/components/inventory/warehouse/warehouse-analytics-cards";
+import { PurchaseAnalyticsCards } from "@/components/purchase/purchase/purchase-analytics-cards";
 
 export default function PurchasePage() {
   const router = useRouter();
@@ -103,7 +103,7 @@ export default function PurchasePage() {
       setSelectedPurchase(id);
       setDeleteDialog(true);
     } else if (action === "edit") {
-      router.push(`/flow-tool/purchase/purchase/${id}`);
+      router.push(`/flow-tool/purchase/purchase-orders/${id}`);
     } else if (action === "view") {
       toast.info("View functionality coming soon");
       // Navigate to view page or open view dialog
@@ -144,7 +144,7 @@ export default function PurchasePage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* <WarehouseAnalyticsCards analytics={purchases?.analytics} loading={loading} /> */}
+      <PurchaseAnalyticsCards analytics={purchases?.analytics} loading={loading} />
 
       <DataTable
         title="Purchases"

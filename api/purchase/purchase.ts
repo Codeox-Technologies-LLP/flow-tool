@@ -48,6 +48,14 @@ export interface PurchaseData extends Record<string, unknown> {
   view?: unknown;
 }
 
+export interface PurchaseAnalytics {
+  summary: {
+    totalPurchases: number;
+    totalAmount: number;
+    confirmedPurchases: number;
+    highestPurchaseValue: number;
+  };
+}
 
 export interface PurchaseListParams {
   page?: number;
@@ -58,6 +66,7 @@ export interface PurchaseListParams {
 }
 
 export interface PurchaseListResponse {
+   analytics?: PurchaseAnalytics;
   tools?: Tool[];
   filter?: unknown[];
   result: {
@@ -70,6 +79,11 @@ export interface PurchaseListResponse {
     currentPage: number;
     totalRecords: number;
   };
+}
+export interface GetPurchaseDetailResponse {
+  purchase: PurchaseData;
+  receiptId: string | null;
+  billId: string | null;
 }
 
 export const purchaseApi = {
@@ -99,7 +113,7 @@ export const purchaseApi = {
     id: string,
     data: Record<string, unknown>,
   ): Promise<{ status: boolean; message: string; data?: PurchaseData }> => {
-    const response = await apiClient.put(`/purchase/edit/${id}`, data);
+    const response = await apiClient.patch(`/purchase/edit/${id}`, data);
     return response.data;
   },
 

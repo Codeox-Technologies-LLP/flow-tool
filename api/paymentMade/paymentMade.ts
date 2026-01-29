@@ -30,17 +30,13 @@ export interface Tool {
   route?: string;
 }
 
-export interface PaymentMAdeData extends Record<string, unknown> {
+export interface PaymentMadeData extends Record<string, unknown> {
   id: string;
   paymentMadeId: string;
   vendorId: string;
-  warehouseId: string;
-  locationId: string;
-  operationType: string;
-  subtotal?: number;
-  discountTotal?: number;
-  total?: number;
-  deliveryDate?: string;
+  createdAt: string;
+  paymentMadeMethod: string;
+  refNo: string;
   amount: number;
   status: string;
   edit?: unknown;
@@ -65,11 +61,18 @@ export interface PaymentMadeListResponse {
     search: boolean;
     pagination: boolean;
     components: TableComponent[];
-    data: PaymentMAdeData[];
+    data: PaymentMadeData[];
     totalPages: number;
     currentPage: number;
     totalRecords: number;
   };
+}
+
+export interface PaymentMadeDetailResponse {
+  status: boolean;
+  message: string;
+  payment: PaymentMadeData;
+  bill?: any | null;
 }
 
 export const paymentMadeApi = {
@@ -83,7 +86,7 @@ export const paymentMadeApi = {
 
   detail: async (
     id: string,
-  ): Promise<{ status: boolean; data: PaymentMAdeData }> => {
+  ): Promise<{ status: boolean; data: PaymentMadeData }> => {
     const response = await apiClient.get(`/payment-made/detail/${id}`);
     return response.data;
   },
@@ -98,7 +101,7 @@ export const paymentMadeApi = {
   edit: async (
     id: string,
     data: Record<string, unknown>,
-  ): Promise<{ status: boolean; message: string; data?: PaymentMAdeData }> => {
+  ): Promise<{ status: boolean; message: string; data?: PaymentMadeData }> => {
     const response = await apiClient.put(`/payment-made/edit/${id}`, data);
     return response.data;
   },

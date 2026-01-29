@@ -73,6 +73,23 @@ export interface ProductListResponse {
   };
 }
 
+export interface ProductDropdownParams {
+  limit?: number;
+  search?: string;
+  vendorId?: string;
+  warehouseId?: string;
+  locationId?: string;
+  type?: "transfer" | "inter-transfer";
+}
+
+export interface ProductDropdownItem {
+  _id: string;
+  name: string;
+  price: number;
+  quantity?: number;
+  stockStatus?: "in stock" | "low stock" | "out of stock";
+}
+
 
 
 export const productApi = {
@@ -108,6 +125,19 @@ export const productApi = {
 
   delete: async (id: string): Promise<{ status: boolean; message: string }> => {
     const response = await apiClient.delete(`/product/delete/${id}`);
+    return response.data;
+  },
+
+  dropdown: async (
+    params: ProductDropdownParams,
+  ): Promise<ProductDropdownItem[]> => {
+    const response = await apiClient.get("/product/dropdown", {
+      params,
+      headers: {
+        companyId: localStorage.getItem("companyId") ?? "",
+      },
+    });
+
     return response.data;
   },
 };

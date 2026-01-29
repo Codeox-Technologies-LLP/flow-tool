@@ -34,13 +34,19 @@ export interface BillData extends Record<string, unknown> {
   id: string;
   billId: string;
   vendorId: string;
-  warehouseId: string;
+  warehouseId?: string;
   locationId: string;
-  operationType: string;
-  subtotal?: number;
-  discountTotal?: number;
-  total?: number;
+  subtotal: number;
+  discountTotal: number;
+  total: number;
   deliveryDate?: string;
+  products: {
+    product: string;
+    productName?: string;
+    qty: number;
+    price: number;
+    discount?: number;
+  }[];
   amount: number;
   status: string;
   edit?: unknown;
@@ -84,13 +90,13 @@ export const billApi = {
   detail: async (
     id: string,
   ): Promise<{ status: boolean; data: BillData }> => {
-    const response = await apiClient.get(`/bill/detail/${id}`);
+    const response = await apiClient.get(`/bill/details/${id}`);
     return response.data;
   },
 
   create: async (
     data: Record<string, unknown>,
-  ): Promise<{ status: boolean; message: string; billId?: string }> => {
+  ): Promise<{ status: boolean; message: string; billId: string }> => {
     const response = await apiClient.post("/bill/create", data);
     return response.data;
   },

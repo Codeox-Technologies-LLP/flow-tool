@@ -35,4 +35,20 @@ export const locationApi = {
     });
     return response.data;
   },
+  
+
+  dropdown: async (options: { locationId?: string; type?: string }) => {
+    const {  locationId, type } = options;
+
+    let route = "/location/dropdown";
+    if (locationId) {
+      route += `/${locationId}`;
+    }
+
+    const response = await apiClient.get(route, {
+      params: { type },
+    });
+
+    return response.data;
+  },
 };

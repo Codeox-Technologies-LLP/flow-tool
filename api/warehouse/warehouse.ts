@@ -149,4 +149,13 @@ export const warehouseApi = {
     );
     return response.data;
   },
+
+  dropdown: async (warehouseId?: string): Promise<any> => {
+    const route = warehouseId
+      ? `/warehouse/dropdown/${warehouseId}`
+      : `/warehouse/dropdown`;
+
+    const response = await apiClient.get(route);
+    return response.data;
+  },
 };
