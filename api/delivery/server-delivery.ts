@@ -1,7 +1,8 @@
 import { serverApiClient } from "../server-fetch";
-export interface ProformaDetailData {
+
+export interface DeliveryDetailData {
   _id: string;
-  proformaId: string;
+  deliveryId: string;
   companyId: string;
   orgId: string;
   relatedTo: string;
@@ -40,18 +41,18 @@ export interface ProformaDetailData {
   __v: number;
 }
 
-export interface ProformaDetailResponse {
+export interface DeliveryDetailResponse {
   status: boolean;
   message: string;
-  data?: ProformaDetailData;
+  data?: DeliveryDetailData;
 }
 
-export async function getProformaDetail(
+export async function getDeliveryDetail(
   id: string
-): Promise<ProformaDetailResponse> {
+): Promise<DeliveryDetailResponse> {
   try {
-    const response = await serverApiClient.get<ProformaDetailResponse>(
-      `/proforma/detail/${id}`
+    const response = await serverApiClient.get<DeliveryDetailResponse>(
+      `/delivery/detail/${id}`
     );
 
     if (response?.status) {
@@ -60,17 +61,17 @@ export async function getProformaDetail(
 
     return {
       status: false,
-      message: "Proforma not found",
+      message: "Delivery not found",
     };
   } catch (error) {
-    console.error("Error fetching proforma detail:", error);
+    console.error("Error fetching Delivery detail:", error);
 
     return {
       status: false,
       message:
         error instanceof Error
           ? error.message
-          : "Failed to fetch proforma detail",
+          : "Failed to fetch Delivery detail",
     };
   }
 }

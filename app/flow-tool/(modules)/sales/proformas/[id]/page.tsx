@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/shared/page-header";
-import { SplitLayoutWithAudit } from "@/components/shared/split-layout";
 import { getProformaDetail } from "@/api/proforma/server-proforma";
 import { ProformaForm } from "@/components/sales/proforma/proforma-form";
 

@@ -1,7 +1,8 @@
 import { serverApiClient } from "../server-fetch";
-export interface ProformaDetailData {
+
+export interface InvoiceDetailData {
   _id: string;
-  proformaId: string;
+  invoiceId: string;
   companyId: string;
   orgId: string;
   relatedTo: string;
@@ -40,18 +41,18 @@ export interface ProformaDetailData {
   __v: number;
 }
 
-export interface ProformaDetailResponse {
+export interface InvoiceDetailResponse {
   status: boolean;
   message: string;
-  data?: ProformaDetailData;
+  data?: InvoiceDetailData;
 }
 
-export async function getProformaDetail(
+export async function getInvoiceDetail(
   id: string
-): Promise<ProformaDetailResponse> {
+): Promise<InvoiceDetailResponse> {
   try {
-    const response = await serverApiClient.get<ProformaDetailResponse>(
-      `/proforma/detail/${id}`
+    const response = await serverApiClient.get<InvoiceDetailResponse>(
+      `/invoice/detail/${id}`
     );
 
     if (response?.status) {
@@ -60,17 +61,17 @@ export async function getProformaDetail(
 
     return {
       status: false,
-      message: "Proforma not found",
+      message: "Invoice not found",
     };
   } catch (error) {
-    console.error("Error fetching proforma detail:", error);
+    console.error("Error fetching Invoice detail:", error);
 
     return {
       status: false,
       message:
         error instanceof Error
           ? error.message
-          : "Failed to fetch proforma detail",
+          : "Failed to fetch Invoice detail",
     };
   }
 }
