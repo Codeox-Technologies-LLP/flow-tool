@@ -19,6 +19,7 @@ export interface quotationListParams {
   page?: number;
   limit?: number;
   search?: string;
+  clientId?: string;
 }
 
 export interface QuotationListResponse {
@@ -98,24 +99,24 @@ export const quotationApi = {
     const response = await apiClient.get("/user-management/dropdown");
     return response.data;
   },
-   dropdownProducts: async (): Promise<
+  dropdownProducts: async (): Promise<
     { _id: string; name: string; price: number; quantity?: number }[]
   > => {
     const response = await apiClient.get("/product/dropdown");
     return response.data;
   },
   dropdownWarehouses: async (): Promise<
-  { _id: string; name: string }[]
-> => {
-  const response = await apiClient.get("/warehouse/dropdown");
-  return response.data;
-},
-dropdownDeals: async (): Promise<
-  { _id: string; title: string }[]
-> => {
-  const response = await apiClient.get("/deals/dropdown");
-  return response.data;
-},
+    { _id: string; name: string }[]
+  > => {
+    const response = await apiClient.get("/warehouse/dropdown");
+    return response.data;
+  },
+  dropdownDeals: async (): Promise<
+    { _id: string; title: string }[]
+  > => {
+    const response = await apiClient.get("/deals/dropdown");
+    return response.data;
+  },
 
 
 
