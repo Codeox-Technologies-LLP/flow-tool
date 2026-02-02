@@ -4,6 +4,7 @@ import { SplitLayout } from "@/components/shared/split-layout";
 import { getLeadAudit, getLeadDetail } from "@/api/lead/server-lead";
 import { LeadForm } from "@/components/crm/lead/lead-form";
 import { LeadAuditLog } from "@/components/crm/lead/lead-audit-log";
+import { LeadStatusActions } from "@/components/shared/LeadStatusActions";
 
 interface EditLeadPageProps {
   params: Promise<{ id: string }>;
@@ -29,16 +30,24 @@ export default async function EditLeadPage({ params }: EditLeadPageProps) {
   console.log("auditResponse", auditResponse);
   return (
     <div className="flex flex-col h-full">
-      <PageHeader
-        title={detailResponse.data.name}
-        description={detailResponse.data.enquiryId || "Update Lead information and settings"}
-        backUrl="/flow-tool/crm/leads"
-      />
 
       <SplitLayout
         sidePanel={<LeadAuditLog auditData={auditData} />}
       >
+        <div className=" flex flex-col gap-3">
+      <PageHeader
+        title={detailResponse.data.name}
+        description={detailResponse.data.enquiryId || "Update Lead information and settings"}
+        backUrl="/flow-tool/crm/leads"
+        actions={
+          <LeadStatusActions
+            actions={detailResponse.data.actions}
+            leadId={id}
+          />
+        }
+      />
         <LeadForm mode="edit" lead={detailResponse.data} enquiryId={id} />
+        </div>
       </SplitLayout>
     </div>
   );

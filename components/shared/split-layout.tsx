@@ -13,7 +13,7 @@ export function SplitLayout({
   children, 
   sidePanel,
   sidePanelWidth = "w-[480px]",
-  sidePanelClassName = "border-l border-gray-200 overflow-y-auto bg-gray-50",
+  sidePanelClassName = "border-l border-gray-200 overflow-y-auto rounded-xl bg-gray-50",
   gap = "gap-4"
 }: SplitLayoutProps) {
   return (

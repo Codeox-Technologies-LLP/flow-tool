@@ -1,5 +1,5 @@
 import { apiClient } from "@/api/axios";
-import type { LeadAuditResponse } from "@/types/lead";
+import type { LeadAction, LeadAuditResponse } from "@/types/lead";
 
 
 export interface TableHeader {
@@ -45,6 +45,7 @@ export interface LeadData extends Record<string, unknown> {
   view?: unknown;
   edit?: unknown;
   delete?: unknown;
+  actions: LeadAction[];
 }
 
 

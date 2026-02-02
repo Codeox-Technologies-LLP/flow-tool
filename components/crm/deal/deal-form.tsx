@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -75,6 +75,10 @@ export function DealForm({ mode, deal, dealId }: DealFormProps) {
           note: "",
         },
   });
+
+  const searchParams = useSearchParams();
+const leadId = searchParams.get("leadId");
+
 
   const selectedClient = watch("clientId");
   const selectedContact = watch("contactId");
@@ -151,6 +155,10 @@ export function DealForm({ mode, deal, dealId }: DealFormProps) {
         title: data.title.trim(),
       };
 
+      if (leadId) {
+  cleanedData.leadId = leadId;
+}
+
       if (data.contactId) cleanedData.contactId = data.contactId;
       if (data.value !== undefined) cleanedData.value = data.value;
       if (data.stage?.trim()) cleanedData.stage = data.stage;
@@ -168,9 +176,9 @@ export function DealForm({ mode, deal, dealId }: DealFormProps) {
           
           // Redirect to the newly created deal detail page
           if (response.dealId) {
-            router.push(`/flow-tool/deals/${response.dealId}`);
+            router.push(`/flow-tool/crm/deals/${response.dealId}`);
           } else {
-            router.push("/flow-tool/deals");
+            router.push("/flow-tool/crm/deals");
           }
         } else {
           toast.error("Failed to create deal", {

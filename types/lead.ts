@@ -41,3 +41,12 @@ export interface LeadEditFormProps {
   lead: import("@/api/lead/lead").LeadData;
   enquiryId: string;
 }
+
+
+export interface LeadAction {
+  key: string;
+  label: string;
+  active?: boolean;
+  type?: "redirect";
+  route?: string;
+}
