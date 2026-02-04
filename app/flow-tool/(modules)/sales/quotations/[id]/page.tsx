@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { SplitLayoutWithAudit } from "@/components/shared/split-layout";
 import { QuotationForm } from "@/components/inventory/quotations/quotation-form";
 import { getQuotationDetail } from "@/api/quotations/quotation-server";
+import { StatusActions } from "@/components/shared/StatusActions";
 
 interface EditQuotationPageProps {
   params: Promise<{ id: string }>;
@@ -22,7 +23,7 @@ export default async function EditQuotationPage({
     redirect("/flow-tool/sales/quotations");
   }
 
-  const { quotation, client, deliveryId } = detailResponse.data;
+  const { quotation, client, deliveryId, actions } = detailResponse.data;
 
   return (
     <div className="flex flex-col h-full">
@@ -33,6 +34,14 @@ export default async function EditQuotationPage({
           title={`Quotation`}
           description={quotation.id}
           backUrl="/flow-tool/sales/quotations"
+          actions={
+            <StatusActions
+              entityId={quotation.id}
+              entity="quotation"
+              actions={actions}
+              type="status"
+            />
+          }
         />
         <QuotationForm
           mode="edit"

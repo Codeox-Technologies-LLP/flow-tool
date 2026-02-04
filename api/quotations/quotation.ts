@@ -64,7 +64,7 @@ export const quotationApi = {
     id: string,
     data: Record<string, unknown>,
   ): Promise<{ status: boolean; message: string }> => {
-    const response = await apiClient.put(`/quotations/edit/${id}`, data);
+    const response = await apiClient.patch(`/quotations/edit/${id}`, data);
     return response.data;
   },
 

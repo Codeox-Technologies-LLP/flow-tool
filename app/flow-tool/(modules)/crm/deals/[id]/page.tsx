@@ -4,6 +4,7 @@ import { SplitLayout } from "@/components/shared/split-layout";
 import { getDealAudit, getDealDetail } from "@/api/deal/server-deal";
 import { DealForm } from "@/components/crm/deal/deal-form";
 import { DealAuditLog } from "@/components/crm/deal/deal-audit-log";
+import { StatusActions } from "@/components/shared/StatusActions";
 
 interface EditDealPageProps {
     params: Promise<{ id: string }>; 
@@ -44,6 +45,14 @@ export default async function EditDealPage({ params }: EditDealPageProps) {
                 title={dealData.title}
                 description={dealData.title || "Update Deal information and settings"}
                 backUrl="/flow-tool/crm/deals"
+                actions={
+                    <StatusActions
+                        entity="deal"
+                        entityId={dealData.id}
+                        actions={dealData.actions}
+                        type="stage"
+                    />
+                }
             />
 
             <SplitLayout

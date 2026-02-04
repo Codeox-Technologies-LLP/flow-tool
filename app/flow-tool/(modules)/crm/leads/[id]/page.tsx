@@ -4,7 +4,7 @@ import { SplitLayout } from "@/components/shared/split-layout";
 import { getLeadAudit, getLeadDetail } from "@/api/lead/server-lead";
 import { LeadForm } from "@/components/crm/lead/lead-form";
 import { LeadAuditLog } from "@/components/crm/lead/lead-audit-log";
-import { LeadStatusActions } from "@/components/shared/LeadStatusActions";
+import { StatusActions } from "@/components/shared/StatusActions";
 
 interface EditLeadPageProps {
   params: Promise<{ id: string }>;
@@ -40,9 +40,11 @@ export default async function EditLeadPage({ params }: EditLeadPageProps) {
         description={detailResponse.data.enquiryId || "Update Lead information and settings"}
         backUrl="/flow-tool/crm/leads"
         actions={
-          <LeadStatusActions
+          <StatusActions
+            entity="lead"
+            entityId={detailResponse.data.id}
             actions={detailResponse.data.actions}
-            leadId={id}
+            type="status"
           />
         }
       />

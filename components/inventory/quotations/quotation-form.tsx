@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Save, Loader2, Plus, Trash2 } from "lucide-react";
 
@@ -82,6 +82,9 @@ export function QuotationForm({
     },
   });
 
+
+  const searchParams = useSearchParams();
+const routeDealId = searchParams.get("dealId");
   const relatedTo = watch("relatedTo");
   const productsWatch = watch("products");
 
@@ -113,6 +116,12 @@ export function QuotationForm({
 
     load();
   }, []);
+
+  useEffect(() => {
+  if (mode === "create" && routeDealId) {
+    setValue("dealId", routeDealId, { shouldValidate: true });
+  }
+}, [mode, routeDealId, setValue]);
 
   /* ---------------- EDIT MODE RESET (🔥 MAIN FIX) ---------------- */
   useEffect(() => {
@@ -192,7 +201,7 @@ export function QuotationForm({
         relatedTo: data.relatedTo,
         contactId: data.contactId || undefined,
         assignedTo: data.assignedTo || undefined,
-        dealId: data.dealId || null,
+        dealId: data.dealId || routeDealId || null,
         currency: data.currency || undefined,
         expiryDate: data.expiryDate || undefined,
         amount: data.amount,
@@ -318,6 +327,17 @@ export function QuotationForm({
               type="date"
               register={register("expiryDate")}
             />
+
+            {deliveryOptions.length > 0 && (
+              <FormField
+                    id="deliveryAddress"
+                    label="Select Delivery Address"
+                    type="dropdown"
+                    options={deliveryOptions}
+                    value={selectedDeliveryId}
+                    onValueChange={setSelectedDeliveryId}
+                  />
+            )}
           </div>
 
           {/* ADDRESSES */}
@@ -339,21 +359,34 @@ export function QuotationForm({
             )}
 
             {deliveryOptions.length > 0 && (
+                <div>
+            {selectedDeliveryId && (
               <Card>
                 <CardHeader>
                   <CardTitle className="text-sm">Delivery Address</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <FormField
-                    id="deliveryAddress"
-                    label="Select Delivery Address"
-                    type="dropdown"
-                    options={deliveryOptions}
-                    value={selectedDeliveryId}
-                    onValueChange={setSelectedDeliveryId}
-                  />
+                <CardContent className="text-sm">
+                  {(() => {
+                    const addr = selectedClient?.deliveryAddresses?.find(
+                      (d: any) => d._id === selectedDeliveryId,
+                    );
+
+                    if (!addr) return null;
+
+                    return (
+                      <>
+                        <div>{addr.street}</div>
+                        <div>
+                          {addr.city}, {addr.state}
+                        </div>
+                        <div>{addr.country}</div>
+                      </>
+                    );
+                  })()}
                 </CardContent>
               </Card>
+            )}
+          </div>
             )}
           </div>
 

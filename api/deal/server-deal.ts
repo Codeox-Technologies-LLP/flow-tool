@@ -1,5 +1,5 @@
 import { serverApiClient } from "@/api/server-fetch";
-import { DealAuditEntry, DealAuditResponse } from "@/types/deal";
+import { Action, DealAuditEntry, DealAuditResponse } from "@/types/deal";
 
 export interface DealDetailData {
     id: string;
@@ -23,6 +23,7 @@ export interface DealDetailData {
             color: string;
         }[];
     };
+    actions:Action[]
 }
 
 export interface DealDetailResponse {

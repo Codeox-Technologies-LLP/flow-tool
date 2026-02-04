@@ -45,7 +45,23 @@ export interface LeadData extends Record<string, unknown> {
   view?: unknown;
   edit?: unknown;
   delete?: unknown;
-  actions: LeadAction[];
+  actions: Action[];
+}
+
+export interface Action {
+  key: string;
+  label: string;
+  order: number; 
+  active?: boolean;
+  route?: string;
+  extraButton?: {
+    label: string;
+    route: string;
+  };
+  extraButtons?: {
+    label: string;
+    route: string;
+  }[];
 }
 
 

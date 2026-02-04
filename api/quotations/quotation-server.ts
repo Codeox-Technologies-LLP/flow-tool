@@ -39,6 +39,17 @@ export interface QuotationDetailResponse {
       updatedAt: string;
     };
     deliveryId: string | null;
+    actions: {
+      key: string;
+      label: string;
+      order:number;
+      active: boolean;
+      extraButton?: {
+        label: string;
+        route: string;
+      };
+      
+    }[];
   };
 }
 

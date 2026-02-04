@@ -117,6 +117,24 @@ export interface DealData extends Record<string, unknown> {
         displayName: string;
         id: string;
     };
+     actions: Action[];
+}
+
+export interface Action {
+  key: string;
+  label: string;
+  order: number; 
+  active?: boolean;
+  route?: string;
+  extraButton?: {
+    label: string;
+    route: string;
+  };
+
+  extraButtons?: {
+    label: string;
+    route: string;
+  }[];
 }
 
 export interface DealAnalytics {
