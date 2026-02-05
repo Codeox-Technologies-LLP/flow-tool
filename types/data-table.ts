@@ -8,7 +8,7 @@ export interface TableHeader {
 export interface TableComponent {
   name: string;
   displayName: string;
-  component: "text" | "action" | "badge" | "custom" | "number" | "currency" | "status";
+  component: "text" | "action" | "badge" | "custom" | "number" | "currency" | "status" | "date";
 }
 
 export interface ActionItem {

@@ -199,24 +199,76 @@ export function DataTable({
     }
 
     if (component.component === "status") {
-      const statusColors: Record<string, string> = {
-        active: "bg-green-100 text-green-700 border-green-200",
-        inactive: "bg-gray-100 text-gray-700 border-gray-200",
-        pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
-        archived: "bg-red-100 text-red-700 border-red-200",
+      type StatusValue = {
+        name: string;
+        displayName: string;
+        color?: string;
       };
-      const statusValue = String(value || "inactive").toLowerCase();
-      console.log(statusValue,"status");
-      
+
+      const status = value as StatusValue | undefined;
+
+      if (!status) {
+        return (
+          <Badge variant="outline" className="capitalize">
+            -
+          </Badge>
+        );
+      }
+
       return (
         <Badge
           variant="outline"
-          className={`${statusColors[statusValue] || statusColors.inactive} capitalize`}
+          className="capitalize font-medium"
+          style={{
+            borderColor: status.color,
+            color: status.color,
+            backgroundColor: status.color ? `${status.color}15` : undefined,
+          }}
         >
-          {statusValue}
+          {status.displayName}
         </Badge>
       );
     }
+
+
+    // if (component.component === "status") {
+    //   const statusColors: Record<string, string> = {
+    //     active: "bg-green-100 text-green-700 border-green-200",
+    //     inactive: "bg-gray-100 text-gray-700 border-gray-200",
+    //     pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
+    //     archived: "bg-red-100 text-red-700 border-red-200",
+    //   };
+    //   const statusValue = String(value || "inactive").toLowerCase();
+    //   console.log(statusValue,"status");
+
+    //   return (
+    //     <Badge
+    //       variant="outline"
+    //       className={`${statusColors[statusValue] || statusColors.inactive} capitalize`}
+    //     >
+    //       {statusValue}
+    //     </Badge>
+    //   );
+    // }
+
+    if (component.component === "date") {
+      if (!value) {
+        return <span className="text-xs text-gray-400">-</span>;
+      }
+
+      const date = new Date(value as string);
+
+      const formattedDate = `${String(date.getDate()).padStart(2, "0")}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}-${date.getFullYear()}`;
+
+      return (
+        <span className="text-xs text-gray-700 whitespace-nowrap">
+          {formattedDate}
+        </span>
+      );
+    }
+
 
     if (component.component === "custom" && renderCustomCell) {
       return renderCustomCell(item, component);
@@ -244,7 +296,7 @@ export function DataTable({
         {/* Smooth animated loading bar for search/pagination */}
         {searching && (
           <div className="absolute top-0 left-0 right-0 h-1 bg-blue-100 overflow-hidden z-10">
-            <div 
+            <div
               className="h-full bg-linear-to-r from-blue-400 via-blue-600 to-blue-400 animate-shimmer"
               style={{
                 width: '50%',

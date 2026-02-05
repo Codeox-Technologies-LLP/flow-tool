@@ -12,7 +12,7 @@ export function StatusActions({
   type = "status",
 }: {
   entityId: string;
-  entity: "deal" | "lead" | "quotation";
+  entity: "deal" | "lead" | "quotation" | "purchase";
   actions: Action[];
   type?: "status" | "stage";
 }) {

@@ -30,8 +30,10 @@ import { FormField } from "@/components/shared/form-field";
 
 interface PurchaseFormProps {
   mode: "create" | "edit";
-  purchase?: PurchaseFormData;
+  purchase?: any;
   purchaseId?: string;
+  receiptId: any;
+  billId: any;
 }
 
 interface Address {
@@ -58,7 +60,7 @@ export function PurchaseForm({
     Array<{ _id: string; name: string; address?: Address; }>
   >([]);
   const [locations, setLocations] = useState<
-    Array<{ _id: string; name: string ; warehouseId:string}>
+    Array<{ _id: string; name: string; warehouseId: string }>
   >([]);
   const [products, setProducts] = useState<
     Array<{ _id: string; name: string; price: number }>
@@ -84,16 +86,16 @@ export function PurchaseForm({
       mode === "edit" && purchase
         ? purchase
         : {
-            vendorId: "",
-            warehouseId: "",
-            locationId: "",
-            deliveryDate: "",
-            products: [{ product: "", qty: 1, price: 0, discount: 0 }],
-            subtotal: 0,
-            discountTotal: 0,
-            total: 0,
-            amount: 0,
-          },
+          vendorId: "",
+          warehouseId: "",
+          locationId: "",
+          deliveryDate: "",
+          products: [{ product: "", qty: 1, price: 0, discount: 0 }],
+          subtotal: 0,
+          discountTotal: 0,
+          total: 0,
+          amount: 0,
+        },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -101,7 +103,7 @@ export function PurchaseForm({
     name: "products",
   });
 
-  const watchedProducts = watch("products",[]);
+  const watchedProducts = watch("products", []);
 
   const calcSubtotal = () => {
     return watchedProducts.reduce((acc, item) => {
@@ -187,85 +189,85 @@ export function PurchaseForm({
   }, []);
 
   useEffect(() => {
-  const fetchLocations = async () => {
-    try {
-      setLoadingLocations(true);
+    const fetchLocations = async () => {
+      try {
+        setLoadingLocations(true);
 
-      const res = await locationApi.dropdown({});
+        const res = await locationApi.dropdown({});
 
-      setLocations(
-        res.map((loc) => ({
-          _id: loc._id,
-          name: loc.name,
-          warehouseId: loc.warehouseId,
-        }))
-      );
-    } catch {
-      toast.error("Failed to load locations");
-    } finally {
-      setLoadingLocations(false);
-    }
-  };
+        setLocations(
+          res.map((loc) => ({
+            _id: loc._id,
+            name: loc.name,
+            warehouseId: loc.warehouseId,
+          }))
+        );
+      } catch {
+        toast.error("Failed to load locations");
+      } finally {
+        setLoadingLocations(false);
+      }
+    };
 
-  fetchLocations();
-}, []);
+    fetchLocations();
+  }, []);
 
   const selectedLocation = watch("locationId");
 
-useEffect(() => {
-  if (!selectedLocation || locations.length === 0 || warehouses.length === 0)
-    return;
+  useEffect(() => {
+    if (!selectedLocation || locations.length === 0 || warehouses.length === 0)
+      return;
 
-  const location = locations.find(l => l._id === selectedLocation);
-  if (!location) return;
+    const location = locations.find(l => l._id === selectedLocation);
+    if (!location) return;
 
-  const warehouse = warehouses.find(
-    w => w._id === location.warehouseId
-  );
+    const warehouse = warehouses.find(
+      w => w._id === location.warehouseId
+    );
 
-  if (warehouse) {
-    setValue("warehouseId", warehouse._id);
+    if (warehouse) {
+      setValue("warehouseId", warehouse._id);
 
-    setWarehouseAddress({
-      name: warehouse.name,
-      address: warehouse.address?.address,
-      city: warehouse.address?.city,
-      state: warehouse.address?.state,
-      country: warehouse.address?.country,
-      phone: warehouse.address?.phone,
+      setWarehouseAddress({
+        name: warehouse.name,
+        address: warehouse.address?.address,
+        city: warehouse.address?.city,
+        state: warehouse.address?.state,
+        country: warehouse.address?.country,
+        phone: warehouse.address?.phone,
+      });
+    }
+  }, [selectedLocation, locations, warehouses]);
+
+  const selectedVendor = watch("vendorId");
+
+  useEffect(() => {
+    if (!selectedVendor || vendors.length === 0) return;
+
+    const vendor = vendors.find(v => v._id === selectedVendor);
+    if (!vendor) return;
+
+    setVendorAddress({
+      name: vendor.name,
+      address: vendor.address?.address,
+      city: vendor.address?.city,
+      state: vendor.address?.state,
+      country: vendor.address?.country,
+      phone: vendor.address?.phone,
+      email: vendor.address?.email,
     });
-  }
-}, [selectedLocation, locations, warehouses]);
-
-const selectedVendor = watch("vendorId");
-
-useEffect(() => {
-  if (!selectedVendor || vendors.length === 0) return;
-
-  const vendor = vendors.find(v => v._id === selectedVendor);
-  if (!vendor) return;
-
-  setVendorAddress({
-    name: vendor.name,
-    address: vendor.address?.address,
-    city: vendor.address?.city,
-    state: vendor.address?.state,
-    country: vendor.address?.country,
-    phone: vendor.address?.phone,
-    email: vendor.address?.email,
-  });
-}, [selectedVendor, vendors]);
+  }, [selectedVendor, vendors]);
 
   const onSubmit = async (data: PurchaseFormData) => {
     try {
       setLoading(true);
-  
+
       if (mode === "create") {
         const response = await purchaseApi.create(data);
-  
+
         if (response.status) {
           toast.success("Purchase created successfully");
-  
+
           if (response.purchaseId) {
             router.push(`/flow-tool/purchase/purchase-orders/${response.purchaseId}`);
           } else {
@@ -274,10 +276,10 @@ useEffect(() => {
         } else {
           toast.error(response.message || "Failed to create Purchase");
         }
-      } 
+      }
       else if (mode === "edit" && purchaseId) {
         const response = await purchaseApi.edit(purchaseId, data);
-  
+
         if (response.status) {
           toast.success("Purchase updated successfully");
           router.refresh();
@@ -337,19 +339,19 @@ useEffect(() => {
 
               {vendorAddress && (
                 <div className="border rounded-md p-4 bg-gray-50 text-sm">
-                    <p className="font-semibold mb-1">Vendor Address</p>
-                    <p>{vendorAddress.name}</p>
-                    <p>{vendorAddress.address}</p>
-                    <p>
-                      {vendorAddress.city}, {vendorAddress.state}
-                    </p>
-                    <p>{vendorAddress.country}</p>
-                    <p>{vendorAddress.phone}</p>
-                  </div>
-                )}
-              </div>
+                  <p className="font-semibold mb-1">Vendor Address</p>
+                  <p>{vendorAddress.name}</p>
+                  <p>{vendorAddress.address}</p>
+                  <p>
+                    {vendorAddress.city}, {vendorAddress.state}
+                  </p>
+                  <p>{vendorAddress.country}</p>
+                  <p>{vendorAddress.phone}</p>
+                </div>
+              )}
+            </div>
 
-             <div className="col-span-1 space-y-2">
+            <div className="col-span-1 space-y-2">
               <FormField
                 id="locationId"
                 label="Location"
@@ -378,13 +380,13 @@ useEffect(() => {
               )}
             </div>
 
-                  <FormField
-                    id="deliveryDate"
-                    label="Delivery Date"
-                    type="date"
-                    register={register("deliveryDate")}
-                  />
-            
+            <FormField
+              id="deliveryDate"
+              label="Delivery Date"
+              type="date"
+              register={register("deliveryDate")}
+            />
+
           </div>
 
           <div className="space-y-4">
@@ -511,6 +513,22 @@ useEffect(() => {
                 <>
                   <Save className="mr-2 h-4 w-4" />
                   {mode === "create" ? "Create Purchase" : "Update Purchase"}
+                </>
+              )}
+            </Button>
+          </div>
+          
+          <div className="flex justify-end gap-3">
+            <Button type="submit" disabled={loading} variant="outline">
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  {mode === "create" ? "Create" : "Update"} Quotation
                 </>
               )}
             </Button>

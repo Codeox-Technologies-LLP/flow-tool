@@ -11,13 +11,13 @@ export interface TableComponent {
   name: string;
   displayName: string;
   component:
-    | "text"
-    | "action"
-    | "badge"
-    | "custom"
-    | "number"
-    | "currency"
-    | "status";
+  | "text"
+  | "action"
+  | "badge"
+  | "custom"
+  | "number"
+  | "currency"
+  | "status";
 }
 
 export interface Tool {
@@ -66,7 +66,7 @@ export interface PurchaseListParams {
 }
 
 export interface PurchaseListResponse {
-   analytics?: PurchaseAnalytics;
+  analytics?: PurchaseAnalytics;
   tools?: Tool[];
   filter?: unknown[];
   result: {
@@ -80,10 +80,28 @@ export interface PurchaseListResponse {
     totalRecords: number;
   };
 }
+
+export interface Action {
+  key: string;
+  label: string;
+  order: number; 
+  active?: boolean;
+  route?: string;
+  extraButton?: {
+    label: string;
+    route: string;
+  };
+
+  extraButtons?: {
+    label: string;
+    route: string;
+  }[];
+}
 export interface GetPurchaseDetailResponse {
   purchase: PurchaseData;
   receiptId: string | null;
   billId: string | null;
+  actions: Action[];
 }
 
 export const purchaseApi = {

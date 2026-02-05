@@ -2,9 +2,10 @@
 
 import { dealApi } from "@/api/deal/deal";
 import { leadApi } from "@/api/lead/lead";
+import { purchaseApi } from "@/api/purchase/purchase";
 import { quotationApi } from "@/api/quotations/quotation";
 
-export type StatusEntity = "deal" | "lead" | "quotation";
+export type StatusEntity = "deal" | "lead" | "quotation" | "purchase";
 
 export async function updateStatus(
   entity: StatusEntity,
@@ -30,6 +31,12 @@ export async function updateStatus(
         throw new Error("quotation update requires status");
       }
       return quotationApi.edit(id, { status: payload.status });
+    }
+    case "purchase": {
+      if (!payload.status) {
+        throw new Error("purchase update requires status");
+      }
+      return purchaseApi.edit(id, { status: payload.status });
     }
 
     default:
