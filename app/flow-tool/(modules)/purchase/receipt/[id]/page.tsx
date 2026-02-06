@@ -4,6 +4,7 @@ import { SplitLayout } from "@/components/shared/split-layout";
 import { getReceiptDetail } from "@/api/receipt/server-receipt";
 import { ReceiptForm } from "@/components/purchase/receipt/receipt-form";
 import { StatusActions } from "@/components/shared/StatusActions";
+import { EntityDeleteAction } from "@/components/shared/entity-delete-action";
 
 interface EditReceiptPageProps {
   params: Promise<{ id: string }>;
@@ -18,7 +19,8 @@ export default async function EditReceiptPage({ params }: EditReceiptPageProps) 
     redirect("/flow-tool/purchase/receipt");
   }
 
-  const { receipt, actions } = detailResponse.data;
+  const { receipt, actions, permissions } = detailResponse.data;
+  const isDraft = receipt.status === "draft";
 
   const receiptData = {
     receiptId: receipt.receiptId,
@@ -35,21 +37,35 @@ export default async function EditReceiptPage({ params }: EditReceiptPageProps) 
     subtotal: receipt.subtotal ?? 0,
     discountTotal: receipt.discountTotal ?? 0,
     total: receipt.total ?? 0,
+    deliveryDate: receipt.deliveryDate,
+    status: receipt.status,
+
   };
 
   return (
     <div className="flex flex-col h-full">
       <PageHeader
-        title={receipt.receiptId}
-        description="Update receipt information and settings"
+        title="Receipt"
+        description={receipt.receiptId}
         backUrl="/flow-tool/purchase/receipt"
         actions={
-          <StatusActions
-            entityId={receipt.id}
-            entity="receipt"
-            actions={actions}
-            type="status"
-          />
+          <div className="flex items-center gap-2">
+            <StatusActions
+              entityId={receipt.id}
+              entity="receipt"
+              actions={actions}
+              type="status"
+            />
+            {receipt.status === "draft" && (
+              <EntityDeleteAction
+                id={receipt.id}
+                entity="receipt"
+                entityName="Receipt"
+                visible={permissions.canDelete}
+                redirectTo="/flow-tool/purchase/receipt"
+              />
+            )}
+          </div>
         }
       />
 
@@ -58,6 +74,7 @@ export default async function EditReceiptPage({ params }: EditReceiptPageProps) 
           mode="edit"
           receipt={receiptData}
           receiptId={id}
+          isDraft={isDraft}
         />
       </SplitLayout>
     </div>

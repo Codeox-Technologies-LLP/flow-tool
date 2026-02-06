@@ -105,7 +105,8 @@ export default function BillPage() {
     } else if (action === "edit") {
       router.push(`/flow-tool/purchase/bill/${id}`);
     } else if (action === "view") {
-      toast.info("View functionality coming soon");
+       router.push(`/flow-tool/purchase/bill/${id}`);
+      // toast.info("View functionality coming soon");
       // Navigate to view page or open view dialog
     }
   };

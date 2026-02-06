@@ -11,13 +11,13 @@ export interface TableComponent {
   name: string;
   displayName: string;
   component:
-    | "text"
-    | "action"
-    | "badge"
-    | "custom"
-    | "number"
-    | "currency"
-    | "status";
+  | "text"
+  | "action"
+  | "badge"
+  | "custom"
+  | "number"
+  | "currency"
+  | "status";
 }
 
 export interface Tool {
@@ -96,8 +96,13 @@ export const billApi = {
 
   create: async (
     data: Record<string, unknown>,
+    receiptId: string
   ): Promise<{ status: boolean; message: string; billId: string }> => {
-    const response = await apiClient.post("/bill/create", data);
+    const response = await apiClient.post(
+      `/bill/create/${receiptId}`,
+      data
+    );
+
     return response.data;
   },
 

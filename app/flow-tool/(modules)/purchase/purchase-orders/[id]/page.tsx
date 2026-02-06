@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 
 import { PageHeader } from "@/components/shared/page-header";
-import { SplitLayoutWithAudit } from "@/components/shared/split-layout";
 import { StatusActions } from "@/components/shared/StatusActions";
 import { getPurchaseDetail } from "@/api/purchase/server-purchase";
 import { PurchaseForm } from "@/components/purchase/purchase/purchase-form";
@@ -14,7 +13,7 @@ interface EditPurchasePageProps {
 export default async function EditPurchasePage({
   params,
 }: EditPurchasePageProps) {
-  const { id } =await params;
+  const { id } = await params;
 
   const detailResponse = await getPurchaseDetail(id);
 
@@ -22,7 +21,10 @@ export default async function EditPurchasePage({
     redirect("/flow-tool/purchase/purchase-orders");
   }
 
-  const { purchase, receiptId, billId, actions , permissions } = detailResponse.data;
+  console.log("response", detailResponse);
+
+
+  const { purchase, receiptId, billId, actions, permissions } = detailResponse.data;
 
 
   const isDraft = purchase.status === "draft";
@@ -30,13 +32,13 @@ export default async function EditPurchasePage({
   return (
     <div className="flex flex-col h-full">
       {/* <SplitLayoutWithAudit> */}
-        <div className="flex flex-col gap-5">
-          <PageHeader
-            title="Purchase"
-            description={purchase.purchaseId}
-            backUrl="/flow-tool/purchase/purchase-orders"
-            actions={
-              <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-5">
+        <PageHeader
+          title="Purchase"
+          description={purchase.purchaseId}
+          backUrl="/flow-tool/purchase/purchase-orders"
+          actions={
+            <div className="flex items-center gap-2">
               <StatusActions
                 entityId={purchase.id}
                 entity="purchase"
@@ -44,27 +46,27 @@ export default async function EditPurchasePage({
                 type="status"
               />
               {purchase.status === "draft" && (
-               <EntityDeleteAction
+                <EntityDeleteAction
                   id={purchase.id}
                   entity="purchase"
                   entityName="Purchase"
                   visible={permissions.canDelete}
                   redirectTo="/flow-tool/purchase/purchase-orders"
                 />
-                )}
-                </div>
-            }
-          />
+              )}
+            </div>
+          }
+        />
 
-          <PurchaseForm
-            mode="edit"
-            purchase={purchase}
-            receiptId={receiptId}
-            billId={billId}
-            purchaseId={id}
-            isDraft={isDraft}
-          />
-        </div>
+        <PurchaseForm
+          mode="edit"
+          purchase={purchase}
+          receiptId={receiptId}
+          billId={billId}
+          purchaseId={id}
+          isDraft={isDraft}
+        />
+      </div>
       {/* </SplitLayoutWithAudit> */}
     </div>
   );

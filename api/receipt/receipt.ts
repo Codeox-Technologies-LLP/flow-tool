@@ -66,6 +66,8 @@ interface Receipt {
   discountTotal?: number;
   total?: number;
   products: ReceiptProduct[];
+  deliveryDate: string;
+  status:string;
 }
 
 export interface ExtraButton {
@@ -88,6 +90,10 @@ export interface Action {
 export interface ReceiptDetailData {
   receipt: Receipt;
   actions: Action[];
+  permissions: {
+    canEdit: boolean;
+    canDelete: boolean;
+  }
 }
 
 

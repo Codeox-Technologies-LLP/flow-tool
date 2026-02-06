@@ -2,7 +2,6 @@
 
 import { PurchaseForm } from "@/components/purchase/purchase/purchase-form";
 import { PageHeader } from "@/components/shared/page-header";
-import { SplitLayoutWithAudit } from "@/components/shared/split-layout";
 
 export default function AddPurchasePage() {
   return (
@@ -13,9 +12,10 @@ export default function AddPurchasePage() {
         backUrl="/flow-tool/purchase/purchase-orders"
       />
 
-      {/* <SplitLayoutWithAudit> */}
-        <PurchaseForm mode="create" />
-      {/* </SplitLayoutWithAudit> */}
+       <PurchaseForm
+        mode="create"
+        isDraft={true}
+      />
     </div>
   );
 }
