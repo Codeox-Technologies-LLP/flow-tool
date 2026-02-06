@@ -102,6 +102,10 @@ export interface GetPurchaseDetailResponse {
   receiptId: string | null;
   billId: string | null;
   actions: Action[];
+  permissions: {
+  canEdit: boolean;
+  canDelete: boolean;
+}
 }
 
 export const purchaseApi = {

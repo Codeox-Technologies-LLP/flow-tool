@@ -5,6 +5,7 @@ import { SplitLayoutWithAudit } from "@/components/shared/split-layout";
 import { StatusActions } from "@/components/shared/StatusActions";
 import { getPurchaseDetail } from "@/api/purchase/server-purchase";
 import { PurchaseForm } from "@/components/purchase/purchase/purchase-form";
+import { EntityDeleteAction } from "@/components/shared/entity-delete-action";
 
 interface EditPurchasePageProps {
   params: Promise<{ id: string }>;
@@ -21,7 +22,10 @@ export default async function EditPurchasePage({
     redirect("/flow-tool/purchase/purchase-orders");
   }
 
-  const { purchase, receiptId, billId, actions } = detailResponse.data;
+  const { purchase, receiptId, billId, actions , permissions } = detailResponse.data;
+
+
+  const isDraft = purchase.status === "draft";
 
   return (
     <div className="flex flex-col h-full">
@@ -32,12 +36,23 @@ export default async function EditPurchasePage({
             description={purchase.purchaseId}
             backUrl="/flow-tool/purchase/purchase-orders"
             actions={
+              <div className="flex items-center gap-2">
               <StatusActions
                 entityId={purchase.id}
                 entity="purchase"
                 actions={actions}
                 type="status"
               />
+              {purchase.status === "draft" && (
+               <EntityDeleteAction
+                  id={purchase.id}
+                  entity="purchase"
+                  entityName="Purchase"
+                  visible={permissions.canDelete}
+                  redirectTo="/flow-tool/purchase/purchase-orders"
+                />
+                )}
+                </div>
             }
           />
 
@@ -47,6 +62,7 @@ export default async function EditPurchasePage({
             receiptId={receiptId}
             billId={billId}
             purchaseId={id}
+            isDraft={isDraft}
           />
         </div>
       {/* </SplitLayoutWithAudit> */}

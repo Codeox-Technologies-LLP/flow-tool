@@ -105,7 +105,8 @@ export default function PurchasePage() {
     } else if (action === "edit") {
       router.push(`/flow-tool/purchase/purchase-orders/${id}`);
     } else if (action === "view") {
-      toast.info("View functionality coming soon");
+      // toast.info("View functionality coming soon");
+      router.push(`/flow-tool/purchase/purchase-orders/${id}`);
       // Navigate to view page or open view dialog
     }
   };

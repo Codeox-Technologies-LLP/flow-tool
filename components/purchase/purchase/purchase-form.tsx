@@ -34,6 +34,7 @@ interface PurchaseFormProps {
   purchaseId?: string;
   receiptId: any;
   billId: any;
+  isDraft: boolean;
 }
 
 interface Address {
@@ -49,6 +50,7 @@ export function PurchaseForm({
   mode,
   purchase,
   purchaseId,
+  isDraft
 }: PurchaseFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -72,7 +74,7 @@ export function PurchaseForm({
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [vendorAddress, setVendorAddress] = useState<any>(null);
   const [warehouseAddress, setWarehouseAddress] = useState<any>(null);
-
+  const isReadOnly = mode === "edit" && !isDraft;
   const {
     register,
     handleSubmit,
@@ -307,6 +309,7 @@ export function PurchaseForm({
   };
 
   return (
+    <fieldset disabled={isReadOnly} className={isReadOnly ? "opacity-70" : ""}>
     <form onSubmit={handleSubmit(onSubmit)}>
       <Card>
         <CardHeader>
@@ -517,24 +520,9 @@ export function PurchaseForm({
               )}
             </Button>
           </div>
-          
-          <div className="flex justify-end gap-3">
-            <Button type="submit" disabled={loading} variant="outline">
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  {mode === "create" ? "Create" : "Update"} Quotation
-                </>
-              )}
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </form>
+    </fieldset>
   );
 }
