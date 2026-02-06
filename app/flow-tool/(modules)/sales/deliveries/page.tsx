@@ -100,7 +100,8 @@ export default function DeliverysPage() {
     } else if (action === "edit") {
       router.push(`/flow-tool/sales/deliveries/${id}`);
     } else if (action === "view") {
-      toast.info("View functionality coming soon");
+      router.push(`/flow-tool/sales/deliveries/${id}`);
+      // toast.info("View functionality coming soon");
       // Navigate to view page or open view dialog
     }
   };

@@ -1,7 +1,7 @@
 import { serverApiClient } from "../server-fetch";
 
 export interface DeliveryDetailData {
-  _id: string;
+  id: string;
   deliveryId: string;
   companyId: string;
   orgId: string;
@@ -41,10 +41,32 @@ export interface DeliveryDetailData {
   __v: number;
 }
 
+
+export interface ExtraButton {
+  label: string;
+  key?: string;
+  route?: string;
+}
+
+export interface Action {
+  key: string;
+  label: string;
+  order: number;
+  active?: boolean;
+  route?: string;
+
+  extraButton?: ExtraButton;
+  extraButtons?: ExtraButton[];
+}
+
+
 export interface DeliveryDetailResponse {
   status: boolean;
   message: string;
-  data?: DeliveryDetailData;
+  data?: {
+    delivery: DeliveryDetailData;
+    actions: Action[];
+  };
 }
 
 export async function getDeliveryDetail(

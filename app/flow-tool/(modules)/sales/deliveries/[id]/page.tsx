@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/shared/page-header";
 import { getDeliveryDetail } from "@/api/delivery/server-delivery";
 import { DeliveryForm } from "@/components/sales/delivery/delivery-form";
+import { StatusActions } from "@/components/shared/StatusActions";
 
 interface EditDeliveryPageProps {
   params: Promise<{ id: string }>;
@@ -16,23 +17,23 @@ export default async function EditDeliveryPage({ params }: EditDeliveryPageProps
     redirect("/flow-tool/sales/deliveries");
   }
 
-  const deliveryData = detailResponse.data;
+  const { delivery, actions } = detailResponse.data;
 
-  const delivery = {
-    relatedTo: deliveryData.relatedTo,
-    contactId: deliveryData.contactId || undefined,
-    assignedTo: deliveryData.assignedTo || undefined,
-    locationId: deliveryData.locationId || undefined,
-    billingAddress: deliveryData.billingAddress,
-    deliveryAddress: deliveryData.deliveryAddress,
-    dealId: deliveryData.dealId || undefined,
-    quotationId: deliveryData.quotationId || undefined,
-    expiryDate: deliveryData.expiryDate 
-      ? new Date(deliveryData.expiryDate).toISOString().split('T')[0] 
+  const deliveryData = {
+    relatedTo: delivery.relatedTo,
+    contactId: delivery.contactId || undefined,
+    assignedTo: delivery.assignedTo || undefined,
+    locationId: delivery.locationId || undefined,
+    billingAddress: delivery.billingAddress,
+    deliveryAddress: delivery.deliveryAddress,
+    dealId: delivery.dealId || undefined,
+    quotationId: delivery.quotationId || undefined,
+    expiryDate: delivery.expiryDate 
+      ? new Date(delivery.expiryDate).toISOString().split('T')[0] 
       : undefined,
-    amount: deliveryData.amount,
-    status: deliveryData.status,
-    products: deliveryData.products.map((p: any) => ({
+    amount: delivery.amount,
+    status: delivery.status,
+    products: delivery.products.map((p: any) => ({
       product: p.product,
       productName: p.productName,
       qty: p.qty,
@@ -46,12 +47,20 @@ export default async function EditDeliveryPage({ params }: EditDeliveryPageProps
   return (
     <div className="flex flex-col h-full">
       <PageHeader
-        title={`Edit Delivery - ${deliveryData.deliveryId}`}
+        title={`Edit Delivery - ${delivery.deliveryId}`}
         description="Update Delivery information and products"
         backUrl="/flow-tool/sales/deliveries"
+        actions={
+          <StatusActions
+            entityId={delivery.id}
+            entity="delivery"
+            actions={actions}
+            type="status"
+          />
+        }
       />
 
-        <DeliveryForm mode="edit" delivery={delivery} deliveryId={id} />
+        <DeliveryForm mode="edit" delivery={deliveryData} deliveryId={id} />
     </div>
   );
 }
