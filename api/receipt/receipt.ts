@@ -11,13 +11,13 @@ export interface TableComponent {
   name: string;
   displayName: string;
   component:
-    | "text"
-    | "action"
-    | "badge"
-    | "custom"
-    | "number"
-    | "currency"
-    | "status";
+  | "text"
+  | "action"
+  | "badge"
+  | "custom"
+  | "number"
+  | "currency"
+  | "status";
 }
 
 export interface Tool {
@@ -46,6 +46,48 @@ export interface ReceiptData extends Record<string, unknown> {
   edit?: unknown;
   delete?: unknown;
   view?: unknown;
+}
+
+interface ReceiptProduct {
+  product: string;
+  qty: number;
+  price: number;
+  discount?: number;
+  returnedCount?: number;
+}
+
+interface Receipt {
+  id: string;
+  receiptId: string;
+  vendorId: string;
+  locationId: string;
+  amount?: number;
+  subtotal?: number;
+  discountTotal?: number;
+  total?: number;
+  products: ReceiptProduct[];
+}
+
+export interface ExtraButton {
+  label: string;
+  key?: string;
+  route?: string;
+}
+
+export interface Action {
+  key: string;
+  label: string;
+  order: number;
+  active?: boolean;
+  route?: string;
+
+  extraButton?: ExtraButton;
+  extraButtons?: ExtraButton[];
+}
+
+export interface ReceiptDetailData {
+  receipt: Receipt;
+  actions: Action[];
 }
 
 
@@ -83,7 +125,7 @@ export const receiptApi = {
 
   detail: async (
     id: string,
-  ): Promise<{ status: boolean; data: ReceiptData }> => {
+  ): Promise<{ status: boolean; data: ReceiptDetailData }> => {
     const response = await apiClient.get(`/receipt/detail/${id}`);
     return response.data;
   },
@@ -105,6 +147,18 @@ export const receiptApi = {
 
   delete: async (id: string): Promise<{ status: boolean; message: string }> => {
     const response = await apiClient.delete(`/receipt/delete/${id}`);
+    return response.data;
+  },
+
+  validate: async (
+    id: string,
+    data: Record<string, unknown> = {}
+  ): Promise<{
+    status: boolean;
+    message: string;
+    data?: ReceiptData;
+  }> => {
+    const response = await apiClient.patch(`/receipt/validate/${id}`, data);
     return response.data;
   },
 };

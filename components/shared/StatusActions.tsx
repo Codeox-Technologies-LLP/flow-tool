@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Action } from "@/types/deal";
 import { updateStatus } from "./status-actions";
+import { extraActionRegistry } from "./extra-action-registry";
 
 export function StatusActions({
   entityId,
@@ -12,7 +13,7 @@ export function StatusActions({
   type = "status",
 }: {
   entityId: string;
-  entity: "deal" | "lead" | "quotation" | "purchase";
+  entity: "deal" | "lead" | "quotation" | "purchase" | "receipt";
   actions: Action[];
   type?: "status" | "stage";
 }) {
@@ -20,16 +21,17 @@ export function StatusActions({
 
   const activeAction = actions.find((a) => a.active);
 
-const extraButtons =
-  activeAction?.extraButtons ??
-  (activeAction?.extraButton ? [activeAction.extraButton] : []);
+  const extraButtons =
+    activeAction?.extraButtons ??
+    (activeAction?.extraButton ? [activeAction.extraButton] : []);
+
   const handleClick = async (action: Action) => {
     try {
-         if (action.route) {
-        // Navigate directly if route exists
+      if (action.route) {
         router.push(action.route);
         return;
       }
+
       if (entity === "deal") {
         await updateStatus(entity, entityId, { order: action.order });
       } else {
@@ -44,41 +46,63 @@ const extraButtons =
     }
   };
 
+  const handleExtraButtonClick = async (btn: any) => {
+    try {
+      if (btn.key && extraActionRegistry[btn.key]) {
+        await extraActionRegistry[btn.key]({ entityId });
+        toast.success(`Action completed successfully`);
+        router.refresh();
+        return;
+      }
+      
+      if (btn.route) {
+        router.push(btn.route);
+        return;
+      }
+
+      toast.warning(`No action defined for ${btn.label}`);
+    } catch (e) {
+      console.error(e);
+      toast.error(`Failed to execute action`);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2">
-      {/* Buttons */}
       {extraButtons.length === 0 && (
         <div className="flex gap-2">
           {actions.map((action) => (
-      <button
-        key={action.key}
-        onClick={() => handleClick(action)}
-        className={`
-          px-4 py-2 text-sm rounded-lg cursor-pointer 
-          ${action.active 
-            ? 'bg-blue-500 text-white'
-            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100'}
-        `}
-      >
-        {action.label}
-      </button>
-    ))}
+            <button
+              key={action.key}
+              onClick={() => handleClick(action)}
+              className={`
+                px-4 py-2 text-sm rounded-lg cursor-pointer 
+                ${
+                  action.active
+                    ? "bg-blue-500 text-white"
+                    : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
+                }
+              `}
+            >
+              {action.label}
+            </button>
+          ))}
         </div>
       )}
 
       {extraButtons.length > 0 && (
-  <div className="flex gap-2">
-    {extraButtons.map((btn, idx) => (
-      <button
-        key={idx}
-        onClick={() => router.push(btn.route)}
-        className="border border-gray-500 text-black px-3 py-2 rounded-lg cursor-pointer"
-      >
-        {btn.label}
-      </button>
-    ))}
-  </div>
-)}
+        <div className="flex gap-2">
+          {extraButtons.map((btn, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleExtraButtonClick(btn)}
+              className="border border-gray-500 text-black px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-50"
+            >
+              {btn.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

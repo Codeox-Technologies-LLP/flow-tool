@@ -21,6 +21,7 @@ export default async function EditDealPage({ params }: EditDealPageProps) {
     }
 
     const dealData = detailResponse.data;
+    console.log(dealData,"sdsdsdsd")
 
     const auditData = auditResponse.status ? auditResponse.data : [];
 

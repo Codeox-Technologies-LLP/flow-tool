@@ -4,8 +4,9 @@ import { dealApi } from "@/api/deal/deal";
 import { leadApi } from "@/api/lead/lead";
 import { purchaseApi } from "@/api/purchase/purchase";
 import { quotationApi } from "@/api/quotations/quotation";
+import { receiptApi } from "@/api/receipt/receipt";
 
-export type StatusEntity = "deal" | "lead" | "quotation" | "purchase";
+export type StatusEntity = "deal" | "lead" | "quotation" | "purchase" | "receipt";
 
 export async function updateStatus(
   entity: StatusEntity,
@@ -37,6 +38,12 @@ export async function updateStatus(
         throw new Error("purchase update requires status");
       }
       return purchaseApi.edit(id, { status: payload.status });
+    }
+     case "receipt": {
+      if (!payload.status) {
+        throw new Error("receipt update requires status");
+      }
+      return receiptApi.edit(id, { status: payload.status });
     }
 
     default:

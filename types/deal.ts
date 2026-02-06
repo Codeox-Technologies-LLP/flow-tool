@@ -1,19 +1,19 @@
 export interface DealAuditEntry {
-  _id: string;
-  dealId: string;
-  action: string;
-  title: string;
-  desc: string;
-  userName: string;
-  icon: string;
-  createdAt: string;
-  updatedAt: string;
+    _id: string;
+    dealId: string;
+    action: string;
+    title: string;
+    desc: string;
+    userName: string;
+    icon: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface DealAuditResponse {
-  status: boolean;
-  message: string;
-  data: DealAuditEntry[];
+    status: boolean;
+    message: string;
+    data: DealAuditEntry[];
 }
 
 export interface TableHeader {
@@ -117,25 +117,26 @@ export interface DealData extends Record<string, unknown> {
         displayName: string;
         id: string;
     };
-     actions: Action[];
+    actions: Action[];
+}
+
+export interface ExtraButton {
+  label: string;
+  key?: string;   
+  route?: string; 
 }
 
 export interface Action {
   key: string;
   label: string;
-  order: number; 
+  order: number;
   active?: boolean;
   route?: string;
-  extraButton?: {
-    label: string;
-    route: string;
-  };
 
-  extraButtons?: {
-    label: string;
-    route: string;
-  }[];
+  extraButton?: ExtraButton;
+  extraButtons?: ExtraButton[];
 }
+
 
 export interface DealAnalytics {
     summary: {
