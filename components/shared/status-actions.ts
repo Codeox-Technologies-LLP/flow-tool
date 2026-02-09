@@ -1,5 +1,6 @@
 "use client";
 
+import { billApi } from "@/api/bill/bill";
 import { dealApi } from "@/api/deal/deal";
 import { deliveryApi } from "@/api/delivery/delivery";
 import { leadApi } from "@/api/lead/lead";
@@ -7,7 +8,7 @@ import { purchaseApi } from "@/api/purchase/purchase";
 import { quotationApi } from "@/api/quotations/quotation";
 import { receiptApi } from "@/api/receipt/receipt";
 
-export type StatusEntity = "deal" | "lead" | "quotation" | "purchase" | "receipt" |"delivery";
+export type StatusEntity = "deal" | "lead" | "quotation" | "purchase" | "receipt" |"delivery" | "bill";
 
 export async function updateStatus(
   entity: StatusEntity,
@@ -51,6 +52,13 @@ export async function updateStatus(
         throw new Error("delivery update requires status");
       }
       return deliveryApi.edit(id, { status: payload.status });
+    }
+
+    case "bill": {
+      if (!payload.status) {
+        throw new Error("delivery update requires status");
+      }
+      return billApi.edit(id, { status: payload.status });
     }
 
     default:

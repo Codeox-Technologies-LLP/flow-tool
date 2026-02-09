@@ -2,9 +2,12 @@
 
 import { PaymentMadeForm } from "@/components/purchase/paymentMade/paymentMade-form";
 import { PageHeader } from "@/components/shared/page-header";
-import { SplitLayoutWithAudit } from "@/components/shared/split-layout";
+import { useSearchParams } from "next/navigation";
 
 export default function AddPaymentMadePage() {
+  const searchParams = useSearchParams();
+  const billId = searchParams.get("billId");
+  
   return (
     <div className="flex flex-col h-full">
       <PageHeader
@@ -13,9 +16,7 @@ export default function AddPaymentMadePage() {
         backUrl="/flow-tool/purchase/paymentMade"
       />
 
-      {/* <SplitLayoutWithAudit> */}
-        <PaymentMadeForm mode="create" />
-      {/* </SplitLayoutWithAudit> */}
+        <PaymentMadeForm mode="create"  billId={billId ?? undefined} />
     </div>
   );
 }

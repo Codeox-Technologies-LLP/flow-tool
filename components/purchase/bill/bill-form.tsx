@@ -33,6 +33,7 @@ interface BillFormProps {
   bill?: BillFormData;
   billId?: string;
   receiptId?: string;
+  isDraft: boolean;
 }
 
 interface Address {
@@ -49,6 +50,7 @@ export function BillForm({
   bill,
   billId,
   receiptId,
+  isDraft
 }: BillFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -72,6 +74,7 @@ export function BillForm({
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [vendorAddress, setVendorAddress] = useState<any>(null);
   const [warehouseAddress, setWarehouseAddress] = useState<any>(null);
+  const isReadOnly = mode === "edit" && !isDraft;
 
   const normalizedBill =
     mode === "edit" && bill
@@ -93,9 +96,9 @@ export function BillForm({
   } = useForm<BillFormData>({
     resolver: zodResolver(billSchema),
     defaultValues:
-     mode === "edit" && normalizedBill
+      mode === "edit" && normalizedBill
         ? normalizedBill
-        :  {
+        : {
           vendorId: "",
           warehouseId: "",
           locationId: "",
@@ -149,50 +152,50 @@ export function BillForm({
 
   const selectedWarehouse = watch("warehouseId");
 
- useEffect(() => {
-     const fetchData = async () => {
-       try {
-         setLoadingVendors(true);
-         setLoadingWarehouses(true);
-         setLoadingProducts(true);
- 
-         const [vendorRes, warehouseRes, productRes] = await Promise.all([
-           vendorApi.dropdown(),
-           warehouseApi.dropdown(),
-           productApi.dropdown({ limit: 20 }),
-         ]);
- 
-         setVendors(vendorRes);
-         setWarehouses(warehouseRes);
-         setProducts(productRes);
-       } catch {
-         toast.error("Failed to load purchase form data");
-       } finally {
-         setLoadingVendors(false);
-         setLoadingWarehouses(false);
-         setLoadingProducts(false);
-       }
-     };
- 
-     fetchData();
-   }, []);
- 
-   useEffect(() => {
-     const fetchLocations = async () => {
-       try {
-         setLoadingLocations(true);
-         const res = await locationApi.dropdown({});
-         setLocations(res);
-       } catch {
-         toast.error("Failed to load locations");
-       } finally {
-         setLoadingLocations(false);
-       }
-     };
- 
-     fetchLocations();
-   }, []);
- 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoadingVendors(true);
+        setLoadingWarehouses(true);
+        setLoadingProducts(true);
+
+        const [vendorRes, warehouseRes, productRes] = await Promise.all([
+          vendorApi.dropdown(),
+          warehouseApi.dropdown(),
+          productApi.dropdown({ limit: 20 }),
+        ]);
+
+        setVendors(vendorRes);
+        setWarehouses(warehouseRes);
+        setProducts(productRes);
+      } catch {
+        toast.error("Failed to load purchase form data");
+      } finally {
+        setLoadingVendors(false);
+        setLoadingWarehouses(false);
+        setLoadingProducts(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        setLoadingLocations(true);
+        const res = await locationApi.dropdown({});
+        setLocations(res);
+      } catch {
+        toast.error("Failed to load locations");
+      } finally {
+        setLoadingLocations(false);
+      }
+    };
+
+    fetchLocations();
+  }, []);
+
   const selectedLocation = watch("locationId");
 
   useEffect(() => {
@@ -292,218 +295,220 @@ export function BillForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <Card>
-        <CardHeader>
-          <CardTitle>Bill Information</CardTitle>
-          <CardDescription>
-            {mode === "create"
-              ? "Create a new bill order"
-              : "Update bill details"}
-          </CardDescription>
-        </CardHeader>
+    <fieldset disabled={isReadOnly} className={isReadOnly ? "opacity-70" : ""}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Bill Information</CardTitle>
+            <CardDescription>
+              {mode === "create"
+                ? "Create a new bill order"
+                : "Update bill details"}
+            </CardDescription>
+          </CardHeader>
 
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
 
 
-            <div className="col-span-1 space-y-2">
-              <FormField
-                id="vendorId"
-                label="Vendor"
-                type="dropdown"
-                required
-                options={vendors}
-                loading={loadingVendors}
-                value={watch("vendorId")}
-                onValueChange={(v) =>
-                  setValue("vendorId", v, { shouldValidate: true })
-                }
-                error={errors.vendorId}
-              />
+              <div className="col-span-1 space-y-2">
+                <FormField
+                  id="vendorId"
+                  label="Vendor"
+                  type="dropdown"
+                  required
+                  options={vendors}
+                  loading={loadingVendors}
+                  value={watch("vendorId")}
+                  onValueChange={(v) =>
+                    setValue("vendorId", v, { shouldValidate: true })
+                  }
+                  error={errors.vendorId}
+                />
 
-              {vendorAddress && (
-                <div className="border rounded-md p-4 bg-gray-50 text-sm">
-                  <p className="font-semibold mb-1">Vendor Address</p>
-                  <p>{vendorAddress.name}</p>
-                  <p>{vendorAddress.address}</p>
-                  <p>
-                    {vendorAddress.city}, {vendorAddress.state}
-                  </p>
-                  <p>{vendorAddress.country}</p>
-                  <p>{vendorAddress.phone}</p>
-                </div>
-              )}
-            </div>
-
-            <div className="col-span-1 space-y-2">
-              <FormField
-                id="locationId"
-                label="Location"
-                type="dropdown"
-                required
-                options={locations}
-                loading={loadingLocations}
-                value={watch("locationId")}
-                onValueChange={(v) =>
-                  setValue("locationId", v, { shouldValidate: true })
-                }
-                error={errors.locationId}
-              />
-
-              {warehouseAddress && (
-                <div className="border rounded-md p-4 bg-gray-50 text-sm">
-                  <p className="font-semibold mb-1">Warehouse Address</p>
-                  <p>{warehouseAddress.name}</p>
-                  <p>{warehouseAddress.address}</p>
-                  <p>
-                    {warehouseAddress.city}, {warehouseAddress.state}
-                  </p>
-                  <p>{warehouseAddress.country}</p>
-                  <p>{warehouseAddress.phone}</p>
-                </div>
-              )}
-            </div>
-
-            <FormField
-              id="deliveryDate"
-              label="Delivery Date"
-              type="date"
-              register={register("deliveryDate")}
-            />
-
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="font-semibold">Products</h3>
-
-            {fields.map((field, index) => {
-              const qty = watch(`products.${index}.qty`) || 0;
-              const price = watch(`products.${index}.price`) || 0;
-              const discount = watch(`products.${index}.discount`) || 0;
-
-              const productTotal = qty * price * (1 - discount / 100);
-
-              return (
-                <div
-                  key={field.id}
-                  className="grid grid-cols-5 gap-4 items-end"
-                >
-                  <FormField
-                    id={`products.${index}.product`}
-                    label="Product"
-                    type="dropdown"
-                    required
-                    options={products}
-                    loading={loadingProducts}
-                    value={watch(`products.${index}.product`)}
-                    onValueChange={(v) => {
-                      const selected = products.find((p) => p._id === v);
-                      setValue(`products.${index}.product`, v, { shouldValidate: true });
-                      setValue(`products.${index}.price`, selected?.price || 0, { shouldValidate: true });
-                      setValue(`products.${index}.productName`, selected?.name || "");
-                    }}
-                    error={errors.products?.[index]?.product}
-                  />
-
-                  <FormField
-                    id={`products.${index}.qty`}
-                    label="Qty"
-                    type="number"
-                    register={register(`products.${index}.qty`, {
-                      valueAsNumber: true,
-                    })}
-                  />
-
-                  <FormField
-                    id={`products.${index}.price`}
-                    label="Price"
-                    type="number"
-                    register={register(`products.${index}.price`, {
-                      valueAsNumber: true,
-                    })}
-                  />
-
-                  <FormField
-                    id={`products.${index}.discount`}
-                    label="Discount %"
-                    type="number"
-                    register={register(`products.${index}.discount`, {
-                      valueAsNumber: true,
-                    })}
-                  />
-
-                  {/* Product total */}
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">
-                      {productTotal.toFixed(2)}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => remove(index)}
-                      className="text-red-500 hover:text-red-700 p-1 ml-2"
-                      title="Remove item"
-                    >
-                      <Trash size={16} />
-                    </button>
+                {vendorAddress && (
+                  <div className="border rounded-md p-4 bg-gray-50 text-sm">
+                    <p className="font-semibold mb-1">Vendor Address</p>
+                    <p>{vendorAddress.name}</p>
+                    <p>{vendorAddress.address}</p>
+                    <p>
+                      {vendorAddress.city}, {vendorAddress.state}
+                    </p>
+                    <p>{vendorAddress.country}</p>
+                    <p>{vendorAddress.phone}</p>
                   </div>
+                )}
+              </div>
+
+              <div className="col-span-1 space-y-2">
+                <FormField
+                  id="locationId"
+                  label="Location"
+                  type="dropdown"
+                  required
+                  options={locations}
+                  loading={loadingLocations}
+                  value={watch("locationId")}
+                  onValueChange={(v) =>
+                    setValue("locationId", v, { shouldValidate: true })
+                  }
+                  error={errors.locationId}
+                />
+
+                {warehouseAddress && (
+                  <div className="border rounded-md p-4 bg-gray-50 text-sm">
+                    <p className="font-semibold mb-1">Warehouse Address</p>
+                    <p>{warehouseAddress.name}</p>
+                    <p>{warehouseAddress.address}</p>
+                    <p>
+                      {warehouseAddress.city}, {warehouseAddress.state}
+                    </p>
+                    <p>{warehouseAddress.country}</p>
+                    <p>{warehouseAddress.phone}</p>
+                  </div>
+                )}
+              </div>
+
+              <FormField
+                id="deliveryDate"
+                label="Delivery Date"
+                type="date"
+                register={register("deliveryDate")}
+              />
+
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="font-semibold">Products</h3>
+
+              {fields.map((field, index) => {
+                const qty = watch(`products.${index}.qty`) || 0;
+                const price = watch(`products.${index}.price`) || 0;
+                const discount = watch(`products.${index}.discount`) || 0;
+
+                const productTotal = qty * price * (1 - discount / 100);
+
+                return (
+                  <div
+                    key={field.id}
+                    className="grid grid-cols-5 gap-4 items-end"
+                  >
+                    <FormField
+                      id={`products.${index}.product`}
+                      label="Product"
+                      type="dropdown"
+                      required
+                      options={products}
+                      loading={loadingProducts}
+                      value={watch(`products.${index}.product`)}
+                      onValueChange={(v) => {
+                        const selected = products.find((p) => p._id === v);
+                        setValue(`products.${index}.product`, v, { shouldValidate: true });
+                        setValue(`products.${index}.price`, selected?.price || 0, { shouldValidate: true });
+                        setValue(`products.${index}.productName`, selected?.name || "");
+                      }}
+                      error={errors.products?.[index]?.product}
+                    />
+
+                    <FormField
+                      id={`products.${index}.qty`}
+                      label="Qty"
+                      type="number"
+                      register={register(`products.${index}.qty`, {
+                        valueAsNumber: true,
+                      })}
+                    />
+
+                    <FormField
+                      id={`products.${index}.price`}
+                      label="Price"
+                      type="number"
+                      register={register(`products.${index}.price`, {
+                        valueAsNumber: true,
+                      })}
+                    />
+
+                    <FormField
+                      id={`products.${index}.discount`}
+                      label="Discount %"
+                      type="number"
+                      register={register(`products.${index}.discount`, {
+                        valueAsNumber: true,
+                      })}
+                    />
+
+                    {/* Product total */}
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">
+                        {productTotal.toFixed(2)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => remove(index)}
+                        className="text-red-500 hover:text-red-700 p-1 ml-2"
+                        title="Remove item"
+                      >
+                        <Trash size={16} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => append({ product: "", qty: 1, price: 0, discount: 0 })}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Product
+              </Button>
+            </div>
+
+            <div className="flex justify-end mt-6">
+              <div className="w-64 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>{Number(watch("subtotal") || 0).toFixed(2)}</span>
                 </div>
-              );
-            })}
-
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => append({ product: "", qty: 1, price: 0, discount: 0 })}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Product
-            </Button>
-          </div>
-
-          <div className="flex justify-end mt-6">
-            <div className="w-64 space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>{Number(watch("subtotal") || 0).toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-red-500">
-                <span>Discount</span>
-                <span>- {Number(watch("discountTotal") || 0).toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between font-semibold border-t pt-2">
-                <span>Total</span>
-                <span>{Number(watch("total") || 0).toFixed(2)}</span>
+                <div className="flex justify-between text-red-500">
+                  <span>Discount</span>
+                  <span>- {Number(watch("discountTotal") || 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between font-semibold border-t pt-2">
+                  <span>Total</span>
+                  <span>{Number(watch("total") || 0).toFixed(2)}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
 
-            <Button type="submit" variant="outline" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  {mode === "create" ? "Create Bill" : "Update Bill"}
-                </>
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </form>
+              <Button type="submit" variant="outline" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    {mode === "create" ? "Create Bill" : "Update Bill"}
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </form>
+    </fieldset>
   );
 }

@@ -13,7 +13,7 @@ export function StatusActions({
   type = "status",
 }: {
   entityId: string;
-  entity: "deal" | "lead" | "quotation" | "purchase" | "receipt" | "delivery";
+  entity: "deal" | "lead" | "quotation" | "purchase" | "receipt" | "delivery" | "bill";
   actions: Action[];
   type?: "status" | "stage";
 }) {

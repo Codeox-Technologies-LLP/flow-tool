@@ -12,7 +12,7 @@ import { getDeleteApi } from "./common-delete-api";
 interface EntityDeleteActionProps {
   id: string;
   entityName: string;
-  entity: "deal" | "lead" | "quotation" | "purchase" | "receipt";
+  entity: "deal" | "lead" | "quotation" | "purchase" | "receipt" | "bill";
   redirectTo: string;
   visible?: boolean;
 }

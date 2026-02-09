@@ -78,6 +78,53 @@ export interface BillListResponse {
   };
 }
 
+export interface ExtraButton {
+  label: string;
+  key?: string;
+  route?: string;
+}
+
+export interface Action {
+  key: string;
+  label: string;
+  order: number;
+  active?: boolean;
+  route?: string;
+  extraButton?: ExtraButton;
+  extraButtons?: ExtraButton[];
+}
+
+export interface Bill {
+  id: string;
+  orgId: string;
+  billId: string;
+  vendorId: string;
+  warehouseId?: string;
+  locationId: string;
+  subtotal: number;
+  discountTotal: number;
+  total: number;
+  deliveryDate?: string;
+  products: {
+    product: string;
+    productName?: string;
+    qty: number;
+    price: number;
+    discount?: number;
+  }[];
+  amount: number;
+  status: string;
+}
+
+export interface BillDetailResponse {
+  bill: Bill;
+  actions: Action[];
+  permissions: {
+    canEdit: boolean;
+    canDelete: boolean;
+  }
+}
+
 export const billApi = {
   list: async (params: BillListParams): Promise<BillListResponse> => {
     const response = await apiClient.get<BillListResponse>(
@@ -109,7 +156,7 @@ export const billApi = {
   edit: async (
     id: string,
     data: Record<string, unknown>,
-  ): Promise<{ status: boolean; message: string; data?: BillData }> => {
+  ): Promise<{ status: boolean; message: string; data?: BillDetailResponse }> => {
     const response = await apiClient.put(`/bill/edit/${id}`, data);
     return response.data;
   },
