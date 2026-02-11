@@ -31,20 +31,37 @@ export interface Tool {
 }
 
 export interface VendorData extends Record<string, unknown> {
-  id: string;
-  vendorId: string;
-  warehouseId: string;
-  locationId: string;
-  operationType: string;
-  subtotal?: number;
-  discountTotal?: number;
-  total?: number;
-  deliveryDate?: string;
-  amount: number;
-  status: string;
+  _id: string;
+  name: string;
+  companyName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  zip?: string;
+  updatedAt?: string;
   edit?: unknown;
   delete?: unknown;
-  view?: unknown;
+}
+
+export interface VendorDetailData {
+  _id: string;
+  id: string;
+  orgId: string;
+  companyId: string;
+  name: string;
+  companyName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  zip?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 
@@ -86,23 +103,27 @@ export interface VendorDropdownItem {
 }
 
 export const vendorApi = {
-  list: async (params: VendorListParams): Promise<VendorListResponse> => {
+  list: async (
+    params: VendorListParams
+  ): Promise<VendorListResponse> => {
     const response = await apiClient.get<VendorListResponse>(
       "/vendor/list",
-      { params },
+      { params }
     );
     return response.data;
   },
 
   detail: async (
-    id: string,
-  ): Promise<{ status: boolean; data: VendorData }> => {
-    const response = await apiClient.get(`/vendor/detail/${id}`);
+    id: string
+  ): Promise<{ status: boolean; data: VendorDetailData }> => {
+    const response = await apiClient.get(
+      `/vendor/detail/${id}`
+    );
     return response.data;
   },
 
   create: async (
-    data: Record<string, unknown>,
+    data: Record<string, unknown>
   ): Promise<{ status: boolean; message: string; vendorId?: string }> => {
     const response = await apiClient.post("/vendor/create", data);
     return response.data;
@@ -110,13 +131,15 @@ export const vendorApi = {
 
   edit: async (
     id: string,
-    data: Record<string, unknown>,
-  ): Promise<{ status: boolean; message: string; data?: VendorData }> => {
+    data: Record<string, unknown>
+  ): Promise<{ status: boolean; message: string; data?: VendorDetailData }> => {
     const response = await apiClient.put(`/vendor/edit/${id}`, data);
     return response.data;
   },
 
-  delete: async (id: string): Promise<{ status: boolean; message: string }> => {
+  delete: async (
+    id: string
+  ): Promise<{ status: boolean; message: string }> => {
     const response = await apiClient.delete(`/vendor/delete/${id}`);
     return response.data;
   },

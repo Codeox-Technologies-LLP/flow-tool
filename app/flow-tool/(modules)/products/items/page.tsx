@@ -7,6 +7,7 @@ import { debounce, get } from "lodash";
 import { DataTable } from "@/components/shared/data-table";
 import { ConfirmationDialog } from "@/components/shared/confirmation-dialog";
 import { productApi, ProductListResponse, Tool } from "@/api/product/product";
+import { ProductAnalyticsCards } from "@/components/products/product/product-analytics-cards";
 
 export default function ProductPage() {
     const router = useRouter();
@@ -134,6 +135,7 @@ export default function ProductPage() {
 
     return (
         <div className="space-y-6 p-6">
+            <ProductAnalyticsCards analytics={products?.analytics} loading={loading} />
 
             <DataTable
                 title="Products"

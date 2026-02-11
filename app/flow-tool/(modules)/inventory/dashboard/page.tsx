@@ -73,14 +73,14 @@ export default function InventoryDashboard() {
       color: "bg-red-500",
       stats: { count: 15, label: "Items" },
     },
-    {
-      name: "Vendors",
-      description: "Manage supplier relationships",
-      route: "/flow-tool/inventory/vendors",
-      icon: Store,
-      color: "bg-indigo-500",
-      stats: { count: 34, label: "Vendors" },
-    },
+    // {
+    //   name: "Vendors",
+    //   description: "Manage supplier relationships",
+    //   route: "/flow-tool/inventory/vendors",
+    //   icon: Store,
+    //   color: "bg-indigo-500",
+    //   stats: { count: 34, label: "Vendors" },
+    // },
   ];
 
   const overviewStats = [

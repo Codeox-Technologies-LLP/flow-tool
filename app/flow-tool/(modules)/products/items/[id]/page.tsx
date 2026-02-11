@@ -2,14 +2,19 @@ import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/shared/page-header";
 import { SplitLayout } from "@/components/shared/split-layout";
 import { getProductDetail } from "@/api/product/server-product";
-import { ProductForm } from "@/components/products/product/product-form";
+import { ProductTab } from "@/components/products/product/product-tabs"; 
 
 interface EditProductPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }
 
-export default async function EditProductPage({ params }: EditProductPageProps) {
+export default async function EditProductPage({ 
+  params,
+  searchParams 
+}: EditProductPageProps) {
   const { id } = await params;
+  const { tab } = await searchParams;
   
   const [detailResponse] = await Promise.all([
     getProductDetail(id),
@@ -19,17 +24,20 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     redirect("/flow-tool/products/items");
   }
 
-  console.log("detailResponse", detailResponse);
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col  h-full">
       <PageHeader
         title={detailResponse.data.name}
-        description={detailResponse.data.productId || "Update product information and settings"}
+        description={detailResponse.data.productId || "Manage product information and settings"}
         backUrl="/flow-tool/products/items"
       />
 
       <SplitLayout>
-        <ProductForm mode="edit" product={detailResponse.data} productId={id} />
+        <ProductTab 
+          product={detailResponse.data} 
+          productId={id}
+          activeTab={tab || "overview"}
+        />
       </SplitLayout>
     </div>
   );

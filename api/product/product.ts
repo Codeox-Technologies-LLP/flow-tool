@@ -11,13 +11,13 @@ export interface TableComponent {
   name: string;
   displayName: string;
   component:
-    | "text"
-    | "action"
-    | "badge"
-    | "custom"
-    | "number"
-    | "currency"
-    | "status";
+  | "text"
+  | "action"
+  | "badge"
+  | "custom"
+  | "number"
+  | "currency"
+  | "status";
 }
 
 export interface Tool {
@@ -56,9 +56,22 @@ export interface ProductListParams {
   sortOrder?: number;
   companyId?: string;
 }
+export interface ProductAnalyticsSummary {
+  totalProducts: number;
+  activeProducts: number;
+  inactiveProducts: number;
+  totalStock: number;
+  totalStockValue: number;
+  lowStockAlerts: number;
+  outOfStockAlerts: number;
+}
 
+export interface ProductAnalytics {
+  summary: ProductAnalyticsSummary;
+}
 
 export interface ProductListResponse {
+  analytics?: ProductAnalytics;
   tools?: Tool[];
   filter?: any[];
   result: {
@@ -90,7 +103,43 @@ export interface ProductDropdownItem {
   stockStatus?: "in stock" | "low stock" | "out of stock";
 }
 
+export interface ProductLocationData {
+  locationName: string;
+  quantity: number;
+  demand: number;
+  status: {
+    name: string;
+    displayName: string;
+    color: string;
+  };
+  [key: string]: unknown;
+}
 
+export interface ProductLocationResponse {
+  status: boolean;
+  result: {
+    tableHeader: TableHeader[];
+    components: TableComponent[];
+    data: ProductLocationData[];
+  };
+}
+
+export interface ProductPurchaseData {
+  purchaseId: string;
+  vendorName: string;
+  location: string;
+  quantity: number;
+  deliveryDate: string;
+  [key: string]: unknown;
+}
+export interface ProductPurchaseResponse {
+  status: boolean;
+  result: {
+    tableHeader: TableHeader[];
+    components: TableComponent[];
+    data: ProductPurchaseData[];
+  };
+}
 
 export const productApi = {
   list: async (params: ProductListParams): Promise<ProductListResponse> => {
@@ -138,6 +187,20 @@ export const productApi = {
       },
     });
 
+    return response.data;
+  },
+
+  productLocation: async (productId: string): Promise<ProductLocationResponse> => {
+    const response = await apiClient.get<ProductLocationResponse>(
+      `/product/location-list/${productId}`
+    );
+    return response.data;
+  },
+
+  productPurchase: async (productId: string): Promise<ProductPurchaseResponse> => {
+    const response = await apiClient.get<ProductPurchaseResponse>(
+      `/product/purchase-list/${productId}`
+    );
     return response.data;
   },
 };
