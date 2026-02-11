@@ -5,6 +5,7 @@ export interface DealDetailData {
     id: string;
     clientId: string;
     contactId: string;
+    leadId?: string;
     title: string;
     value: number;
     probability: number;

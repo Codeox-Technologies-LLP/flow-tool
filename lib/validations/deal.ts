@@ -9,6 +9,7 @@ export const dealSchema = z.object({
   probability: z.number().min(0, "Probability must be between 0 and 100").max(100, "Probability must be between 0 and 100").optional(),
   closeDate: z.string().optional(),
   note: z.string().max(1000, "Description must be less than 1000 characters").optional(),
+   leadId: z.string().optional().nullable(),
 });
 
 export type DealFormData = z.infer<typeof dealSchema>;

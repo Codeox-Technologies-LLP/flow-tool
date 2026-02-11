@@ -20,6 +20,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FormField } from "@/components/shared/form-field";
+import { useEntityDraftStore } from "@/stores/useEntityDraftStore";
+import { leadApi } from "@/api/lead/lead";
 
 interface DealFormProps {
   mode: "create" | "edit";
@@ -32,6 +34,7 @@ interface DealFormProps {
     probability?: number;
     closeDate?: string;
     note?: string;
+    leadId?: string | null;
   };
   dealId?: string;
 }
@@ -44,6 +47,8 @@ export function DealForm({ mode, deal, dealId }: DealFormProps) {
   const [loadingClients, setLoadingClients] = useState(true);
   const [contacts, setContacts] = useState<Array<{ _id: string; name: string }>>([]);
   const [loadingContacts, setLoadingContacts] = useState(false);
+  const [leads, setLeads] = useState<Array<{ _id: string; name: string }>>([]);
+  const [loadingLeads, setLoadingLeads] = useState(false);
 
   const {
     register,
@@ -63,6 +68,7 @@ export function DealForm({ mode, deal, dealId }: DealFormProps) {
           probability: deal.probability || 0,
           closeDate: deal.closeDate || "",
           note: deal.note || "",
+          leadId: deal.leadId || null,
         }
       : {
           clientId: "",
@@ -73,15 +79,20 @@ export function DealForm({ mode, deal, dealId }: DealFormProps) {
           probability: 0,
           closeDate: "",
           note: "",
+          leadId: undefined,
         },
   });
 
   const searchParams = useSearchParams();
 const leadId = searchParams.get("leadId");
 
+const setDraft = useEntityDraftStore((s) => s.setDraft);
+const clearDraft = useEntityDraftStore((s) => s.clearDraft);
+
 
   const selectedClient = watch("clientId");
   const selectedContact = watch("contactId");
+  const selectedLead = watch("leadId");
 //   const selectedStage = watch("stage");
 
   // Fetch clients for dropdown
@@ -145,6 +156,69 @@ const leadId = searchParams.get("leadId");
     fetchContacts();
   }, [selectedClient]);
 
+  useEffect(() => {
+
+  const fetchLeads = async () => {
+    try {
+      setLoadingLeads(true);
+      const response = await leadApi.dropdown();
+      if (response?.length) {
+        setLeads(
+          response.map((lead) => ({
+            _id: lead._id,
+            name: lead.enquiryId,
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Failed to fetch leads:", error);
+      toast.error("Failed to load leads");
+    } finally {
+      setLoadingLeads(false);
+    }
+  };
+
+  fetchLeads();
+}, []);
+
+  useEffect(() => {
+      if (!leadId || mode !== "create") return;
+
+      const hydrateFromLead = async () => {
+        const res = await leadApi.detail(leadId);
+        if (!res?.status || !res.data) return;
+
+        setDraft("deal:create", {
+          leadId,
+          title: `${res.data.name} Deal`,
+          value: Number(res.data.expectedValue) || 0,
+        });
+      };
+
+      hydrateFromLead();
+    }, [leadId, mode, setDraft]);
+
+    const draft = useEntityDraftStore(
+      (s) => s.drafts["deal:create"]
+    );
+
+    useEffect(() => {
+      if (!draft || !leadId || mode !== "create") return;
+
+      Object.entries(draft).forEach(([key, value]) => {
+        setValue(key as any, value as any, {
+          shouldValidate: false,
+          shouldDirty: false,
+        });
+      });
+    }, [draft, leadId, mode, setValue]);
+
+    useEffect(() => {
+      return () => {
+        clearDraft("deal:create");
+      };
+    }, [clearDraft]);
+
   const onSubmit = async (data: DealFormData) => {
     try {
       setLoading(true);
@@ -161,6 +235,7 @@ const leadId = searchParams.get("leadId");
 
       if (data.contactId) cleanedData.contactId = data.contactId;
       if (data.value !== undefined) cleanedData.value = data.value;
+      if (data.leadId) cleanedData.leadId = data.leadId;
       if (data.stage?.trim()) cleanedData.stage = data.stage;
       if (data.probability !== undefined) cleanedData.probability = data.probability;
       if (data.closeDate) cleanedData.closeDate = data.closeDate;
@@ -174,6 +249,7 @@ const leadId = searchParams.get("leadId");
             description: `Deal ID: ${response.dealId}`,
           });
           
+          clearDraft("deal:create");
           // Redirect to the newly created deal detail page
           if (response.dealId) {
             router.push(`/flow-tool/crm/deals/${response.dealId}`);
@@ -216,7 +292,7 @@ const leadId = searchParams.get("leadId");
   };
 
   const handleCancel = () => {
-    router.push("/flow-tool/deals");
+    router.push("/flow-tool/crm/deals");
   };
 
   return (
@@ -270,6 +346,22 @@ const leadId = searchParams.get("leadId");
               loading={loadingContacts}
               disabled={!selectedClient || loadingContacts}
               error={errors.contactId}
+            />
+
+            <FormField
+              id="leadId"
+              label="Lead"
+              type="dropdown"
+              placeholder="Select lead (optional)"
+              searchPlaceholder="Search leads..."
+              emptyText="No leads found"
+              options={leads}
+              value={selectedLead ?? undefined}
+              onValueChange={(value) =>
+                setValue("leadId", value || undefined, { shouldValidate: true })
+              }
+              loading={loadingLeads}
+              error={errors.leadId}
             />
 
             {/* Deal Name */}

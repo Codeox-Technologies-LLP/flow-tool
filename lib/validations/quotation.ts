@@ -15,7 +15,8 @@ export const quotationSchema = z.object({
   dealId: z.string().optional(),
   assignedTo: z.string().optional(),
   contactId: z.string().optional(),
-
+  billingAddress: z.string().optional(),
+  deliveryAddress: z.string().optional(),
   expiryDate: z.string().optional(),
   currency: z.string().optional(),
 

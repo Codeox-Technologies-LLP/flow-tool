@@ -150,4 +150,9 @@ export const leadApi = {
     const response = await apiClient.get<LeadAuditResponse>(`/enquiry/audit/${id}`);
     return response.data;
   },
+
+  dropdown: async (): Promise<{_id: string; enquiryId: string;}[]> => {
+    const response = await apiClient.get<{_id: string; enquiryId: string;}[]>("/enquiry/dropdown");
+    return response.data;
+  },
 };

@@ -27,13 +27,14 @@ export default async function EditDealPage({ params }: EditDealPageProps) {
 
     const deal = {
         title: dealData.title,
-        closeDate: dealData.closeDate,
+        closeDate: dealData.closeDate ? new Date(dealData.closeDate).toISOString().split("T")[0]: "",
             // typeof dealData.closeDate === "string"
             //     ? dealData.closeDate
             //     : dealData.closeDate?.toISOString(),
         value: dealData.value,
         clientId: dealData.clientId,
         contactId: dealData.contactId,
+        leadId: dealData.leadId,
         probability: dealData.probability,
         note: dealData.note,
         stageOrder: dealData.stageOrder,
