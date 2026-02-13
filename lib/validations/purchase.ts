@@ -4,6 +4,8 @@ export const purchaseItemSchema = z.object({
   product: z.string().min(1, "Product is required"),
   productName: z.string().optional(),
   qty: z.number().min(1),
+  received: z.number().min(0),
+  billed: z.number().min(0),
   price: z.number().min(0),
   discount: z.number().min(0).max(100).optional(),
   description: z.string().optional(),

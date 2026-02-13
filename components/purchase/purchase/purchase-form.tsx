@@ -106,7 +106,7 @@ export function PurchaseForm({
           warehouseId: "",
           locationId: "",
           deliveryDate: "",
-          products: [{ product: "", qty: 1, price: 0, discount: 0 }],
+          products: [{ product: "", qty: 1, price: 0, discount: 0,  received: 0, billed: 0 }],
           subtotal: 0,
           discountTotal: 0,
           total: 0,
@@ -385,6 +385,8 @@ export function PurchaseForm({
                 const qty = watch(`products.${index}.qty`) || 0;
                 const price = watch(`products.${index}.price`) || 0;
                 const discount = watch(`products.${index}.discount`) || 0;
+                const received = watch(`products.${index}.received`) || 0;
+                const billed = watch(`products.${index}.billed`) || 0;
 
                 const productTotal = qty * price * (1 - discount / 100);
 
@@ -418,6 +420,24 @@ export function PurchaseForm({
                         valueAsNumber: true,
                       })}
                     />
+
+                    {!isDraft && (
+                      <>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Received</label>
+                          <div className="px-3 py-2 border rounded-md bg-gray-50">
+                            {received}
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Billed</label>
+                          <div className="px-3 py-2 border rounded-md bg-gray-50">
+                            {billed}
+                          </div>
+                        </div>
+                      </>
+                    )}
 
                     <FormField
                       id={`products.${index}.price`}
@@ -458,7 +478,7 @@ export function PurchaseForm({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => append({ product: "", qty: 1, price: 0, discount: 0 })}
+                onClick={() => append({ product: "", qty: 1, price: 0, discount: 0 , received: 0,  billed: 0})}
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Product
